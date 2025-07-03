@@ -7,8 +7,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+.env
 node_modules
 package-lock.json
+backup.md
 dist
 dist-ssr
 public/collections.html
@@ -26,3 +28,4 @@ public/updates.html
 *.njsproj
 *.sln
 *.sw?
+.cursor/mcp.json

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useApiContext } from '../context/ApiContext';
 
 // 靜態假資料，與 collections.html 對齊
 const mockApis = [
@@ -48,7 +47,7 @@ const mockApis = [
     demo: (
       <div className="demo-container border border-dashed border-gray-200 rounded-lg p-4 bg-gray-50">
         <div className="flex flex-col">
-          <textarea className="w-full p-3 border border-gray-200 rounded-md mb-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none" rows={2} placeholder="輸入要朗讀的文字...">歡迎使用 Web Speech API，這是一個能讓網頁說話的強大功能。</textarea>
+          <textarea className="w-full p-3 border border-gray-200 rounded-md mb-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none" rows={2} placeholder="輸入要朗讀的文字..." defaultValue="歡迎使用 Web Speech API，這是一個能讓網頁說話的強大功能。"></textarea>
           <div className="flex space-x-2">
             <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center whitespace-nowrap">
               <div className="w-5 h-5 flex items-center justify-center mr-1">

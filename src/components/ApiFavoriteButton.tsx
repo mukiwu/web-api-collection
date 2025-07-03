@@ -61,7 +61,7 @@ const ApiFavoriteButton: React.FC<ApiFavoriteButtonProps> = ({ apiId }) => {
 
   return (
     <button
-      className={`w-8 h-8 flex items-center justify-center rounded-[8px] hover:cursor-pointer ${isFavorite ? 'text-yellow-500' : 'text-gray-400 hover:text-gray-600'}`}
+      className={`w-8 h-8 flex items-center justify-center rounded-[8px] hover:cursor-pointer ${isFavorite ? 'text-primary' : 'text-gray-400 hover:text-gray-600'}`}
       onClick={isFavorite ? handleUnfavorite : handleFavorite}
       disabled={loading}
       title={isFavorite ? '取消收藏' : '加入收藏'}

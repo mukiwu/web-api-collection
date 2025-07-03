@@ -30,6 +30,17 @@ const ApiDetailPage: React.FC = () => {
     );
   }
 
+  // 假資料：API 詳細介紹
+  const apiDetailContent = {
+    background: "在 Web Animations API 出現之前，網頁動畫主要依賴 CSS transitions/animations 或 JavaScript 操作 DOM 樣式，這讓複雜動畫難以管理、同步與控制。",
+    solution: "Web Animations API 提供了統一的 JavaScript 介面，讓開發者能以程式方式建立、控制、同步動畫，並能與 CSS 動畫無縫整合。",
+    useCases: [
+      "動畫進場/退場效果",
+      "互動式 UI 動畫（如按鈕點擊、拖曳）",
+      "複雜的序列動畫（如步驟導覽、教學動畫）"
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-white relative">
       {/* 關閉按鈕 */}
@@ -62,6 +73,37 @@ const ApiDetailPage: React.FC = () => {
             </div>
           </section>
         )}
+        {/* API 詳細介紹區塊 */}
+        <section className="mb-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-primary mb-2 flex items-center">
+                <i className="ri-information-line mr-2"></i>
+                API 詳細介紹
+              </h2>
+              <div className="h-1 w-12 bg-primary/20 rounded mb-4"></div>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">歷史背景與困難</h3>
+                  <p className="text-gray-600 leading-relaxed">{apiDetailContent.background}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">API 解決方案</h3>
+                  <p className="text-gray-600 leading-relaxed">{apiDetailContent.solution}</p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">實際應用情境</h3>
+                  <ul className="list-disc pl-5 text-gray-600 leading-relaxed">
+                    {apiDetailContent.useCases.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* 其他 API 詳細資訊區塊可再擴充 */}
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">程式碼範例</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -85,7 +127,6 @@ const ApiDetailPage: React.FC = () => {
             這裡可以放互動範例、Demo 或 Playground
           </div>
         </section>
-        {/* 其他 API 詳細資訊區塊可再擴充 */}
       </main>
       <Footer />
     </div>

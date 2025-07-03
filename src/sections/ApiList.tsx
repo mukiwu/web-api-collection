@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
+import ApiFavoriteButton from '../components/ApiFavoriteButton';
 
 // 靜態假資料，與 collections.html 對齊
 const mockApis = [
@@ -133,11 +135,43 @@ const mockApis = [
   },
 ];
 
+type Api = {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  homepage: string;
+  tags: string[];
+  icon: string;
+  browsers: { icon: string; label: string }[];
+  code: string;
+  demo: React.ReactNode;
+  favorite_count: number;
+  created_at: string;
+};
+
 export const ApiList: React.FC = () => {
-  // 這裡不串 context，直接渲染所有靜態卡片
+  const [apis, setApis] = useState<Api[]>([]);
+
+  useEffect(() => {
+    const fetchApis = async () => {
+      const { data, error } = await supabase
+      .from('apis_with_favorite_count')
+      .select('*')
+      .order('favorite_count', { ascending: false });
+      if (data) {
+        setApis(data);
+      }
+      if (error) {
+        console.error('Error fetching APIs:', error);
+      }
+    };
+    fetchApis();
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {mockApis.map(api => (
+      {apis.map(api => (
         <div key={api.id} className="api-card bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-5">
             <div className="flex items-start justify-between mb-4">
@@ -146,9 +180,7 @@ export const ApiList: React.FC = () => {
                 {api.name}
               </h3>
               <div className="flex space-x-1">
-                <button className="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-[8px]">
-                  <i className="ri-bookmark-line"></i>
-                </button>
+                <ApiFavoriteButton apiId={api.id} />
                 <button className="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-[8px]">
                   <i className="ri-share-line"></i>
                 </button>

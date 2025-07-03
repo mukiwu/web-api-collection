@@ -1,38 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Aside } from '../sections/Aside';
 import { ApiList } from '../sections/ApiList';
 import { UpdatesSection } from '../sections/UpdatesSection';
 import SupportStatsSection from '../sections/SupportStatsSection';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { supabase } from '../supabaseClient';
-
-type Api = {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  homepage: string;
-  tags: string[];
-  created_at: string;
-};
 
 const CollectionsPage: React.FC = () => {
-  const [apis, setApis] = useState<Api[]>([]);
-
-  useEffect(() => {
-    const fetchApis = async () => {
-      const { data, error } = await supabase.from('apis').select('*');
-      if (data) {
-        setApis(data);
-      }
-      if (error) {
-        console.error('Error fetching APIs:', error);
-      }
-    };
-    fetchApis();
-  }, []);
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -43,33 +17,13 @@ const CollectionsPage: React.FC = () => {
         <Aside />
         {/* Main Content */}
         
-        <div className="p-4">
-        <h1 className="text-2xl font-bold mb-4">API TEST</h1>
-        <ul>
-          {apis.map(api => (
-            <li key={api.id} className="mb-4 border-b pb-2">
-              <div className="font-semibold">{api.name}</div>
-              <div className="text-gray-600">{api.description}</div>
-              <div className="text-sm text-gray-400">{api.category}</div>
-              <a href={api.homepage} className="text-blue-500" target="_blank" rel="noopener noreferrer">
-                官方網站
-              </a>
-              <div>
-                {api.tags && api.tags.map(tag => (
-                  <span key={tag} className="inline-block bg-gray-200 text-xs rounded px-2 py-1 mr-1">{tag}</span>
-                ))}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
         <div className="flex-1">
           {/* 標題與說明 */}
           <div className="mb-8">
             <h1 className="code-font text-3xl font-bold text-gray-900 mb-2">Web APIs 集合</h1>
-            <p className="text-gray-600 max-w-2xl">
-              探索現代瀏覽器提供的強大 Web APIs，提升您的網頁應用功能與使用者體驗。每個 API 都附有詳細說明、程式碼範例和瀏覽器相容性資訊。
+            <p className="text-gray-600">
+              探索現代瀏覽器提供的強大 Web APIs，提升您的網頁應用功能與使用者體驗。<br />
+              每個 API 都附有詳細說明、程式碼範例和瀏覽器相容性資訊。
             </p>
           </div>
           {/* 熱門 APIs 區塊（含篩選列） */}

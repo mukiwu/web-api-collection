@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { supabase } from '../supabaseClient';
 import ApiFavoriteButton from '../components/ApiFavoriteButton';
 import { getAnonymousId } from '../utils/anonymousId';
+import { useNavigate } from 'react-router-dom';
 
 // 假資料：分類
 const categories = [
@@ -32,6 +33,13 @@ export type Api = {
   // 其他欄位可依 supabase schema 擴充
 };
 
+// 工具函式：label 若含「不支援」則顯示「不支援」，否則只取版本號
+function browserSupportText(label: string) {
+  if (label.includes('不支援')) return '不支援';
+  const match = label.match(/(\d+\+|\d+\.\d+\+|\d+)/);
+  return match ? match[0] : label;
+}
+
 const CollectionsPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('全部');
   const [showFavoriteOnly, setShowFavoriteOnly] = useState(false);
@@ -40,6 +48,7 @@ const CollectionsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [apis, setApis] = useState<Api[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // 取得 supabase 資料
   useEffect(() => {
@@ -145,7 +154,26 @@ const CollectionsPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pagedApis.map(api => (
-              <div key={api.id} className="api-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 p-6 flex flex-col justify-between">
+              <div
+                key={api.id}
+                className="api-card bg-white rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden border border-gray-100 p-6 flex flex-col justify-between cursor-pointer"
+                onClick={() => 
+                  document.startViewTransition(() => {
+                    navigate(`/api/${api.id}`, { state: { api } });
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                  })
+                }
+                tabIndex={0}
+                role="button"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    document.startViewTransition(() => {
+                      navigate(`/api/${api.id}`, { state: { api } });
+                      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    });
+                  }
+                }}
+              >
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
@@ -163,6 +191,22 @@ const CollectionsPage: React.FC = () => {
                     <ApiFavoriteButton apiId={api.id} />
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{api.description}</p>
+                  {/* 瀏覽器相容性區塊 */}
+                  {Array.isArray(api.browsers) && api.browsers.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="code-font text-sm font-medium text-gray-700 mb-2">瀏覽器相容性</h4>
+                      <div className="flex flex-wrap justify-between md:flex-nowrap gap-3 md:gap-4">
+                        {api.browsers.map(b => (
+                          <div key={b.label} className="browser-icon flex flex-col items-center text-xs md:text-sm">
+                            <div className="w-8 h-8 flex items-center justify-center text-gray-700">
+                              <i className={`${b.icon} ri-lg md:ri-2x`}></i>
+                            </div>
+                            <span className="text-gray-600">{browserSupportText(b.label)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2 mb-2">
                     {api.tags && api.tags.map(tag => (
                       <span key={tag} className="tag">{tag}</span>

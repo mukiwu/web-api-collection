@@ -1,8 +1,11 @@
 import React from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const UpdatesPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
+      <Header />
       <main className="container mx-auto px-4 py-10">
         <div className="mb-8 text-center">
           <h1 className="code-font text-3xl md:text-4xl font-bold text-gray-900 mb-2">最新更新<br />Web APIs 資源中心</h1>
@@ -19,7 +22,7 @@ const UpdatesPage: React.FC = () => {
             </div>
             {/* API 類型 */}
             <div>
-              <select className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none">
+              <select className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:outline-hidden">
                 <option>所有類型</option>
                 <option>DOM APIs</option>
                 <option>裝置 APIs</option>
@@ -39,7 +42,7 @@ const UpdatesPage: React.FC = () => {
             </div>
             {/* 搜尋框 */}
             <div className="flex-1">
-              <input type="text" placeholder="搜尋關鍵字..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none" />
+              <input type="text" placeholder="搜尋關鍵字..." className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:outline-hidden" />
             </div>
             {/* 結果計數 */}
             <div className="text-xs text-gray-500 whitespace-nowrap">共 <span>12</span> 筆結果</div>
@@ -66,6 +69,7 @@ const UpdatesPage: React.FC = () => {
           <button className="px-6 py-3 bg-white text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 !rounded-button"><i className="ri-download-line mr-2"></i>載入更多</button>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

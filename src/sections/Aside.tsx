@@ -16,60 +16,40 @@ const tags = [
   'JavaScript', 'HTML5', 'CSS', 'Animation', 'Storage', 'Mobile'
 ];
 
-interface CategoryButtonProps {
-  label: string;
-  icon: string;
-  active: boolean;
-  onClick: () => void;
-}
-const CategoryButton: React.FC<CategoryButtonProps> = ({ label, icon, active, onClick }) => (
-  <button
-    className={`flex items-center w-full px-4 py-2 mb-1 rounded-lg text-sm transition-colors ${active ? 'bg-primary/10 text-primary font-semibold' : 'text-gray-700 hover:bg-gray-50'}`}
-    onClick={onClick}
-  >
-    <i className={`${icon} mr-2`}></i>
-    {label}
-  </button>
-);
-
-interface TagButtonProps {
-  tag: string;
-  onClick: () => void;
-}
-const TagButton: React.FC<TagButtonProps> = ({ tag, onClick }) => (
-  <button
-    className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-full hover:bg-primary/10 hover:text-primary transition-colors mr-2 mb-2"
-    onClick={onClick}
-  >
-    #{tag}
-  </button>
-);
-
 export const Aside: React.FC = () => {
   const { category, setCategory } = useApiContext();
 
   return (
-    <aside className="md:w-64 flex-shrink-0 mb-8 md:mb-0">
-      <div className="sticky top-24">
-        <div className="mb-8">
-          <h2 className="code-font text-base font-semibold text-gray-900 mb-3">API 分類</h2>
-          <div>
-            {categories.map(cat => (
-              <CategoryButton
-                key={cat.key}
-                label={cat.label}
-                icon={cat.icon}
-                active={category === cat.key}
-                onClick={() => setCategory(cat.key)}
-              />
-            ))}
-          </div>
+    <aside className="md:w-64 shrink-0">
+      <div className="sticky top-24 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <h2 className="code-font font-medium text-gray-900">API 分類</h2>
         </div>
-        <div>
-          <h2 className="code-font text-base font-semibold text-gray-900 mb-3">熱門標籤</h2>
-          <div className="flex flex-wrap">
+        <nav className="p-2">
+          {categories.map(cat => (
+            <button
+              key={cat.key}
+              className={`flex items-center px-3 py-2 rounded-md text-sm mb-1 transition-colors ${category === cat.key ? 'bg-primary/5 text-primary' : 'text-gray-700 hover:bg-gray-50'}`}
+              onClick={() => setCategory(cat.key)}
+            >
+              <div className="w-5 h-5 flex items-center justify-center mr-2">
+                <i className={cat.icon}></i>
+              </div>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="p-4 border-t border-gray-100">
+          <h3 className="code-font font-medium text-gray-900 mb-3">熱門標籤</h3>
+          <div className="flex flex-wrap gap-2">
             {tags.map(tag => (
-              <TagButton key={tag} tag={tag} onClick={() => setCategory(tag.toLowerCase())} />
+              <button
+                key={tag}
+                className={`tag${category === tag.toLowerCase() ? ' active' : ''}`}
+                onClick={() => setCategory(tag.toLowerCase())}
+              >
+                {tag}
+              </button>
             ))}
           </div>
         </div>

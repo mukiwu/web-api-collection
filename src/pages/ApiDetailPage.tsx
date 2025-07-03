@@ -46,6 +46,22 @@ const ApiDetailPage: React.FC = () => {
           <h1 className="code-font text-3xl font-bold text-gray-900 mb-2">{api.name}</h1>
           <p className="text-gray-700 text-lg mb-4">{api.description}</p>
         </div>
+        {/* 瀏覽器相容性區塊 */}
+        {Array.isArray(api.browsers) && api.browsers.length > 0 && (
+          <section className="mb-10">
+            <h4 className="code-font text-lg font-medium text-gray-700 mb-2">瀏覽器相容性</h4>
+            <div className="flex flex-wrap md:flex-nowrap gap-4 mb-4 justify-start md:justify-between">
+              {api.browsers.map(b => (
+                <div key={b.label} className="browser-icon flex flex-col items-center text-base md:text-lg">
+                  <div className="w-12 h-12 flex items-center justify-center mb-1 text-gray-700">
+                    <i className={`${b.icon} ri-2x`}></i>
+                  </div>
+                  <span className="text-gray-600 text-xs md:text-sm">{b.label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
         <section className="mb-10">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">程式碼範例</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

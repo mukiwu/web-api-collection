@@ -204,7 +204,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-12 text-center">
-            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors !rounded-button whitespace-nowrap">
+            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap">
               <div className="w-5 h-5 flex items-center justify-center mr-2">
                 <i className="ri-apps-line"></i>
               </div>
@@ -222,7 +222,7 @@ const HomePage: React.FC = () => {
               <p className="text-lg text-gray-600 max-w-2xl">瀏覽我們最近更新和新增的 API 文件，掌握最新的網頁技術發展</p>
             </div>
             <div className="mt-4 md:mt-0">
-              <div className="flex items-center border rounded-full px-1 py-1">
+              <div className="flex items-center border border-gray-200 rounded-full px-1 py-1">
                 <button className="px-4 py-2 text-sm font-medium rounded-full bg-primary text-white whitespace-nowrap">最新</button>
                 <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">熱門</button>
                 <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">推薦</button>
@@ -355,7 +355,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-12 text-center">
-            <a href="#" className="inline-flex items-center px-6 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 !rounded-button whitespace-nowrap">
+            <a href="#" className="inline-flex items-center px-6 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 whitespace-nowrap">
               <span>查看所有更新</span>
               <div className="w-5 h-5 flex items-center justify-center ml-2">
                 <i className="ri-arrow-right-line"></i>
@@ -455,7 +455,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className="mt-12 text-center">
-            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors !rounded-button whitespace-nowrap">
+            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap">
               <div className="w-5 h-5 flex items-center justify-center mr-2">
                 <i className="ri-book-open-line"></i>
               </div>
@@ -474,7 +474,7 @@ const HomePage: React.FC = () => {
             <p className="text-lg text-gray-600 mb-8">獲取最新的 Web API 更新、教學和開發技巧，直接發送到您的收件匣</p>
             <div className="flex max-w-xl mx-auto">
               <input type="email" placeholder="您的電子郵件地址" className="w-full px-5 py-4 text-base border-none rounded-l-lg bg-white shadow-sm focus:ring-2 focus:ring-primary/20 focus:outline-none" />
-              <button className="px-6 py-4 bg-primary text-white text-base font-medium rounded-r-lg hover:bg-primary/90 transition-colors rounded-none! whitespace-nowrap">訂閱</button>
+              <button className="px-6 py-4 bg-primary text-white text-base font-medium rounded-r-lg hover:bg-primary/90 transition-colors whitespace-nowrap">訂閱</button>
             </div>
             <p className="text-sm text-gray-500 mt-4">我們尊重您的隱私，不會分享您的電子郵件地址。您可以隨時取消訂閱。</p>
           </div>

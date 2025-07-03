@@ -160,38 +160,65 @@ const SupportStatsSection: React.FC = () => {
     ],
   };
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="code-font text-xl font-semibold text-gray-900">瀏覽器支援統計</h2>
-        <div className="flex items-center space-x-2">
-          <button className="text-sm text-gray-500 hover:text-gray-900 flex items-center rounded-[8px]">
-            <div className="w-5 h-5 flex items-center justify-center mr-1">
-              <i className="ri-download-line"></i>
+    <section className="py-16 bg-white">
+      <div className="container mx-auto">
+        <div className="mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              瀏覽器支援統計
+            </h2>
+            <p className="text-lg text-gray-600">
+              了解各種 Web API 在主流瀏覽器中的支援情況，做出更明智的開發決策
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 p-6 mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  API 支援率 (主流瀏覽器)
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center border border-gray-200 rounded-full px-1 py-1">
+                    <button className="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white whitespace-nowrap">
+                      月
+                    </button>
+                    <button
+                      className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">
+                      季
+                    </button>
+                    <button
+                      className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">
+                      年
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div id="browser-support-chart" className="w-full h-80">
+                <BrowserSupportBarChart data={barData} title="API 支援率 (主流瀏覽器)" yLabel="支援率 (%)" />
+              </div>
             </div>
-            <span className="whitespace-nowrap">匯出數據</span>
-          </button>
-          <div className="flex items-center border rounded-full px-1 py-1">
-            <button className="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white whitespace-nowrap">月</button>
-            <button className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">季</button>
-            <button className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">年</button>
+
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">API 使用趨勢</h3>
+                <button
+                  className="text-sm text-gray-500 hover:text-gray-900 flex items-center !rounded-button whitespace-nowrap">
+                  <div className="w-5 h-5 flex items-center justify-center mr-1">
+                    <i className="ri-download-line"></i>
+                  </div>
+                  <span>匯出數據</span>
+                </button>
+              </div>
+              <div id="api-usage-chart" className="w-full h-80">
+                <ApiUsageLineChart data={lineData} title="API 使用趨勢" yLabel="使用率 (%)" />
+              </div>
+            </div>
           </div>
+
+          
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden p-5">
-          <h3 className="code-font text-base font-medium text-gray-900 mb-4">API 支援率 (主流瀏覽器)</h3>
-          <div className="w-full h-64">
-            <BrowserSupportBarChart data={barData} title="API 支援率 (主流瀏覽器)" yLabel="支援率 (%)" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden p-5">
-          <h3 className="code-font text-base font-medium text-gray-900 mb-4">API 使用趨勢</h3>
-          <div className="w-full h-64">
-            <ApiUsageLineChart data={lineData} title="API 使用趨勢" yLabel="使用率 (%)" />
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 };
 

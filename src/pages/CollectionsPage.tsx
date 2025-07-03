@@ -37,7 +37,7 @@ const CollectionsPage: React.FC = () => {
                   </div>
                   <span className="whitespace-nowrap">篩選</span>
                 </button>
-                <div className="flex items-center border rounded-full px-1 py-1">
+                <div className="flex items-center border border-gray-200 rounded-full px-1 py-1">
                   <button className="px-3 py-1 text-xs font-medium rounded-full bg-primary text-white whitespace-nowrap">最新</button>
                   <button className="px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-full whitespace-nowrap">熱門</button>
                 </div>

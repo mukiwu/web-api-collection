@@ -1,14 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 
-const browserSupport = [
-  { name: 'Chrome', data: [98, 95, 92, 88, 85] },
-  { name: 'Firefox', data: [95, 92, 88, 82, 78] },
-  { name: 'Safari', data: [90, 85, 80, 75, 70] },
-  { name: 'Edge', data: [96, 93, 90, 85, 82] },
-];
-const categories = ['DOM APIs', '儲存 APIs', '網路 APIs', '裝置 APIs', '多媒體 APIs'];
-
 // 型別定義
 interface BarChartProps {
   data: {
@@ -37,7 +29,7 @@ interface LineChartProps {
 }
 
 // 支援率長條圖
-export const BrowserSupportBarChart: React.FC<BarChartProps> = ({ data, title, yLabel }) => {
+export const BrowserSupportBarChart: React.FC<BarChartProps> = ({ data, _title, yLabel }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

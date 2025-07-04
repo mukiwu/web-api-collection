@@ -217,24 +217,47 @@ const ApiDetailPage: React.FC = () => {
       </div>
       <nav className="p-4">
         <ul className="space-y-1">
-          {toc.map(item => (
-            <li key={item.id} className={item.level === 2 ? 'ml-0' : 'ml-4'}>
-              <a
-                href={`#${item.id}`}
-                className={`toc-item block px-3 py-2 text-sm rounded-lg border-l-2 transition-colors ${tocActive === item.id ? 'text-gray-900 border-primary bg-blue-50' : 'text-gray-600 border-transparent'}`}
-                onClick={e => {
-                  setTocActive(item.id);
-                  const el = document.getElementById(item.id);
-                  if (el) {
-                    e.preventDefault();
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
-              >
-                {item.text}
-              </a>
-            </li>
-          ))}
+          {toc.map((item, idx) => {
+            // 找出上一個 H2
+            let parentH2Idx = idx;
+            while (parentH2Idx >= 0 && toc[parentH2Idx].level !== 2) parentH2Idx--;
+            const parentH2 = toc[parentH2Idx];
+            const isActive = tocActive === item.id;
+            // 目前 active 的 idx
+            const tocActiveIdx = toc.findIndex(t => t.id === tocActive);
+            // 如果 active 是 H3，找出其父 H2
+            let activeParentH2Id = '';
+            if (tocActiveIdx >= 0 && toc[tocActiveIdx].level === 3) {
+              let pIdx = tocActiveIdx;
+              while (pIdx >= 0 && toc[pIdx].level !== 2) pIdx--;
+              if (pIdx >= 0) activeParentH2Id = toc[pIdx].id;
+            }
+            // H2 active 條件
+            const isH2Active = item.level === 2 && (tocActive === item.id || activeParentH2Id === item.id);
+
+            return (
+              <li key={item.id} className={item.level === 2 ? 'ml-0' : 'ml-4'}>
+                <a
+                  href={`#${item.id}`}
+                  className={[
+                    'toc-item block px-3 py-2 text-sm rounded-lg border-l-2 transition-colors hover:bg-gray-100',
+                    isActive && item.level === 3 ? 'bg-gray-100 text-gray-900 border-primary active' : '',
+                    isH2Active ? 'text-gray-900 border-primary bg-blue-50 active' : 'text-gray-600 border-transparent',
+                  ].join(' ')}
+                  onClick={e => {
+                    setTocActive(item.id);
+                    const el = document.getElementById(item.id);
+                    if (el) {
+                      e.preventDefault();
+                      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
+                >
+                  {item.text}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </aside>

@@ -6,6 +6,12 @@ import ReactMarkdown from 'react-markdown';
 import mockDocMarkdown from './mockDoc.md?raw';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import * as remarkGfm from 'remark-gfm';
+import { visit } from 'unist-util-visit';
+import type { Parent } from 'unist';
+import type { PhrasingContent } from 'mdast';
 
 // Mock 資料
 const mockApi = {
@@ -17,20 +23,6 @@ const mockApi = {
   tags: ['網路', '非同步', 'JSON', 'HTTP', 'Promise'],
   description: 'Fetch API 提供了一個用於獲取資源的介面，包括跨網路的非同步請求。它是 XMLHttpRequest 的現代替代方案，提供更強大和靈活的功能集。Fetch API 使用 Promise，這使得它的 API 更簡潔，並避免了回調地獄。',
 };
-
-const mockToc = [
-  { id: 'overview', text: '概述', level: 2 },
-  { id: 'syntax', text: '語法', level: 2 },
-  { id: 'parameters', text: '參數', level: 2 },
-  { id: 'return-value', text: '返回值', level: 2 },
-  { id: 'methods', text: '方法', level: 2 },
-  { id: 'properties', text: '屬性', level: 2 },
-  { id: 'examples', text: '使用範例', level: 2 },
-  { id: 'advanced', text: '進階使用', level: 2 },
-  { id: 'compatibility', text: '瀏覽器兼容性', level: 2 },
-  { id: 'faq', text: '常見問題', level: 2 },
-  { id: 'related', text: '相關資源', level: 2 },
-];
 
 // mock 使用範例
 const mockExamples = [
@@ -147,9 +139,54 @@ const mockRelatedApis = [
   },
 ];
 
+// 固定區塊標題
+const fixedSections = [
+  { id: 'overview', text: '概述', level: 2 },
+  { id: 'examples', text: '使用範例', level: 2 },
+  { id: 'faq', text: '常見問題', level: 2 },
+  { id: 'related', text: '相關資源', level: 2 },
+  { id: 'compatibility', text: '瀏覽器相容性', level: 2 },
+  { id: 'related-apis', text: '相關 API', level: 2 },
+];
+
+function extractToc(markdown: string) {
+  const toc: { id: string; text: string; level: number }[] = [];
+  const tree = unified().use(remarkParse).use(remarkGfm.default).parse(markdown);
+  visit(tree, 'heading', (node: Parent & { depth: number; children: PhrasingContent[] }) => {
+    // 只收 H2/H3
+    if (node.depth === 2 || node.depth === 3) {
+      const text = node.children
+        .filter((n) => (n.type === 'text' || n.type === 'inlineCode') && 'value' in n)
+        .map((n) => (n as any).value as string)
+        .join('');
+      const id = text
+        .toLowerCase()
+        .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      toc.push({ id, text, level: node.depth });
+    }
+  });
+  return toc;
+}
+
 const ApiDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [tocActive, setTocActive] = useState('overview');
+
+  // 只取主 markdown 的 H2/H3
+  const mainToc = extractToc(mockDocMarkdown);
+  // 過濾掉和固定區塊重複的 id
+  const filteredMainToc = mainToc.filter(t => !fixedSections.some(f => f.id === t.id));
+  // TOC = 概述 + 主 markdown TOC + 其他固定區塊（不重複）
+  const toc = [
+    fixedSections[0], // 概述
+    ...filteredMainToc,
+    fixedSections[1], // 使用範例
+    fixedSections[2], // 常見問題
+    fixedSections[3], // 相關資源
+    fixedSections[4], // 瀏覽器相容性
+    fixedSections[5], // 相關 API
+  ];
 
   // 側邊欄目錄元件
   const TableOfContents = () => (
@@ -181,12 +218,20 @@ const ApiDetailPage: React.FC = () => {
       </div>
       <nav className="p-4">
         <ul className="space-y-1">
-          {mockToc.map(item => (
-            <li key={item.id}>
+          {toc.map(item => (
+            <li key={item.id} className={item.level === 2 ? 'ml-0' : 'ml-4'}>
               <a
                 href={`#${item.id}`}
                 className={`toc-item block px-3 py-2 text-sm rounded-lg border-l-2 transition-colors ${tocActive === item.id ? 'text-gray-900 border-primary bg-blue-50' : 'text-gray-600 border-transparent'}`}
-                onClick={() => setTocActive(item.id)}
+                onClick={e => {
+                  setTocActive(item.id);
+                  // 平滑滾動
+                  const el = document.getElementById(item.id);
+                  if (el) {
+                    e.preventDefault();
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
                 {item.text}
               </a>
@@ -337,20 +382,23 @@ const ApiDetailPage: React.FC = () => {
                       </pre>
                     );
                   },
+                  h2({ children, ...props }) {
+                    const text = String(children);
+                    const id = text
+                      .toLowerCase()
+                      .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+                      .replace(/^-+|-+$/g, '');
+                    return <h2 id={id} {...props}>{children}</h2>;
+                  },
+                  h3({ children, ...props }) {
+                    // 不產生 id，不進 TOC
+                    return <h3 {...props}>{children}</h3>;
+                  },
                   blockquote(props) {
                     return <blockquote className="border-l-4 border-gray-300 pl-4 text-gray-700 my-4" {...props} />;
                   },
                   a(props) {
                     return <a className="text-primary underline hover:text-primary/80" {...props} />;
-                  },
-                  h1(props) {
-                    return <h1 className="text-2xl font-bold text-gray-900 mt-8 mb-4" {...props} />;
-                  },
-                  h2(props) {
-                    return <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4" {...props} />;
-                  },
-                  h3(props) {
-                    return <h3 className="text-lg font-medium text-gray-900 mt-6 mb-3" {...props} />;
                   },
                   ul(props) {
                     return <ul className="list-disc list-inside space-y-1 text-gray-700" {...props} />;

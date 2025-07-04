@@ -71,7 +71,7 @@ const ApiDetailPage: React.FC = () => {
   const { id: apiId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [api, setApi] = useState<ApiType | null>(null);
-  const [detail, setDetail] = useState<ApiDetailType | null>(null);
+  const [sections, setSections] = useState<any[]>([]);
   const [examples, setExamples] = useState<ApiExampleType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,9 +81,9 @@ const ApiDetailPage: React.FC = () => {
       // 1. 取得 apis
       const { data: apiData } = await supabase.from('apis').select('*').eq('id', apiId).single();
       setApi(apiData as ApiType);
-      // 2. 取得 api_details
-      const { data: detailData } = await supabase.from('api_details').select('*').eq('api_id', apiId).single();
-      setDetail(detailData as ApiDetailType);
+      // 2. 取得 api_sections
+      const { data: sectionData } = await supabase.from('api_sections').select('*').eq('api_id', apiId).order('order');
+      setSections(sectionData || []);
       // 3. 取得 api_examples
       const { data: exampleData } = await supabase.from('api_examples').select('*').eq('api_id', apiId).order('order');
       setExamples((exampleData || []) as ApiExampleType[]);
@@ -113,10 +113,14 @@ const ApiDetailPage: React.FC = () => {
   //   );
   // }
 
+  // 取得各章節內容
+  const overviewSection = sections.find(s => s.type === 'overview');
+  const whyNeededSection = sections.find(s => s.type === 'why_needed');
+  const docSection = sections.find(s => s.type === 'doc');
   // why_needed 欄位建議 markdown 格式，分三欄以 --- 分隔
   let background = '', solution = '', useCases = '';
-  if (detail?.why_needed) {
-    const parts = detail.why_needed.split(/---+/);
+  if (whyNeededSection && whyNeededSection.content) {
+    const parts = whyNeededSection.content.split(/---+/);
     background = parts[0]?.trim() || '';
     solution = parts[1]?.trim() || '';
     useCases = parts[2]?.trim() || '';
@@ -136,7 +140,7 @@ const ApiDetailPage: React.FC = () => {
         <div className="flex">
           {/* 側邊欄目錄 */}
           <aside className="w-72 bg-white border-r border-gray-100 min-h-screen hidden lg:block">
-            <TableOfContents content={detail?.doc_content || ''} />
+            <TableOfContents content={docSection?.content || ''} />
           </aside>
           {/* 主內容 */}
           <div className="flex-1 min-h-screen relative">
@@ -185,9 +189,9 @@ const ApiDetailPage: React.FC = () => {
                 </section>
               )}
               {/* 主文件內容（markdown） */}
-              {detail?.doc_content && (
+              {docSection?.content && (
                 <section className="mb-12 prose prose-slate max-w-none">
-                  <ReactMarkdown>{detail.doc_content}</ReactMarkdown>
+                  <ReactMarkdown>{docSection.content}</ReactMarkdown>
                 </section>
               )}
               {/* 使用範例與即時演示 */}

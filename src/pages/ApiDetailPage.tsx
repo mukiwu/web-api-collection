@@ -153,7 +153,6 @@ function extractToc(markdown: string) {
   const toc: { id: string; text: string; level: number }[] = [];
   const tree = unified().use(remarkParse).use(remarkGfm.default).parse(markdown);
   visit(tree, 'heading', (node: Parent & { depth: number; children: PhrasingContent[] }) => {
-    // 只收 H2/H3
     if (node.depth === 2 || node.depth === 3) {
       const text = node.children
         .filter((n) => (n.type === 'text' || n.type === 'inlineCode') && 'value' in n)
@@ -177,7 +176,7 @@ const ApiDetailPage: React.FC = () => {
   const mainToc = extractToc(mockDocMarkdown);
   // 過濾掉和固定區塊重複的 id
   const filteredMainToc = mainToc.filter(t => !fixedSections.some(f => f.id === t.id));
-  // TOC = 概述 + 主 markdown TOC + 其他固定區塊（不重複）
+  // TOC = 概述 + 主 markdown TOC (H2/H3) + 其他固定區塊
   const toc = [
     fixedSections[0], // 概述
     ...filteredMainToc,
@@ -225,7 +224,6 @@ const ApiDetailPage: React.FC = () => {
                 className={`toc-item block px-3 py-2 text-sm rounded-lg border-l-2 transition-colors ${tocActive === item.id ? 'text-gray-900 border-primary bg-blue-50' : 'text-gray-600 border-transparent'}`}
                 onClick={e => {
                   setTocActive(item.id);
-                  // 平滑滾動
                   const el = document.getElementById(item.id);
                   if (el) {
                     e.preventDefault();
@@ -275,7 +273,7 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </div>
             {/* 概述區塊 */}
-            <section id="overview" className="mb-12">
+            <section id="overview" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-full flex-shrink-0 mr-3">
                   <i className="ri-wifi-line ri-lg"></i>
@@ -388,11 +386,15 @@ const ApiDetailPage: React.FC = () => {
                       .toLowerCase()
                       .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
                       .replace(/^-+|-+$/g, '');
-                    return <h2 id={id} {...props}>{children}</h2>;
+                    return <h2 id={id} style={{ scrollMarginTop: '72px' }} {...props}>{children}</h2>;
                   },
                   h3({ children, ...props }) {
-                    // 不產生 id，不進 TOC
-                    return <h3 {...props}>{children}</h3>;
+                    const text = String(children);
+                    const id = text
+                      .toLowerCase()
+                      .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
+                      .replace(/^-+|-+$/g, '');
+                    return <h3 id={id} style={{ scrollMarginTop: '72px' }} {...props}>{children}</h3>;
                   },
                   blockquote(props) {
                     return <blockquote className="border-l-4 border-gray-300 pl-4 text-gray-700 my-4" {...props} />;
@@ -427,7 +429,7 @@ const ApiDetailPage: React.FC = () => {
               </ReactMarkdown>
             </section>
             {/* 使用範例區塊 */}
-            <section id="examples" className="mb-12">
+            <section id="examples" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">使用範例</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {mockExamples.map(ex => (
@@ -449,7 +451,7 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </section>
             {/* FAQ 區塊 */}
-            <section id="faq" className="mb-12">
+            <section id="faq" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">常見問題</h2>
               <div className="space-y-6">
                 {mockFaqs.map(faq => (
@@ -458,7 +460,7 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </section>
             {/* 資源區塊 */}
-            <section id="related" className="mb-12">
+            <section id="related" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">相關資源</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {mockResources.map(res => (
@@ -481,7 +483,7 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </section>
             {/* 相容性區塊 */}
-            <section id="compatibility" className="mb-12">
+            <section id="compatibility" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                 <i className="ri-shield-check-line text-primary mr-2"></i> 瀏覽器相容性
               </h2>
@@ -508,7 +510,7 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </section>
             {/* 相關 API 區塊 */}
-            <section id="related-apis" className="mb-12">
+            <section id="related-apis" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                 <i className="ri-share-forward-line text-primary mr-2"></i> 相關 API
               </h2>

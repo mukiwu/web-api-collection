@@ -28,7 +28,7 @@ interface Section {
   type: string;
   title: string;
   content: SectionContent;
-  section_order: number;
+  order: number;
   collapsed?: boolean;
 }
 
@@ -545,6 +545,16 @@ const OverviewSectionEditor: React.FC<{
   );
 };
 
+// 工具函式：根據 type 補齊預設值
+function getSectionContentWithDefault(type: string, content: any): SectionContent {
+  if (type === 'overview') return { ...DEFAULT_OVERVIEW, ...content };
+  if (type === 'syntax') return { ...DEFAULT_SYNTAX, ...content };
+  if (type === 'params') return { ...DEFAULT_PARAMS, ...content };
+  if (type === 'methods') return { ...DEFAULT_METHODS, ...content };
+  if (type === 'examples') return { ...DEFAULT_EXAMPLES, ...content };
+  return content;
+}
+
 const ApiEditPage: React.FC = () => {
   const { id: apiId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -567,8 +577,13 @@ const ApiEditPage: React.FC = () => {
       const { data: apiData } = await supabase.from('apis').select('*').eq('id', apiId).single();
       if (apiData) setApi(apiData);
       // 2. 取得 api_sections
-      const { data: sectionData } = await supabase.from('api_sections').select('*').eq('api_id', apiId).order('section_order');
-      if (sectionData) setSections(sectionData);
+      const { data: sectionData } = await supabase.from('api_sections').select('*').eq('api_id', apiId).order('order');
+      if (sectionData) {
+        setSections(sectionData.map(s => ({
+          ...s,
+          content: getSectionContentWithDefault(s.type, s.content)
+        })));
+      }
       // 3. 取得 api_examples
       const { data: exampleData } = await supabase.from('api_examples').select('*').eq('api_id', apiId).order('order');
       if (exampleData) setExamples(exampleData);
@@ -599,7 +614,21 @@ const ApiEditPage: React.FC = () => {
     // 2. sections
     if (api_id) {
       await supabase.from('api_sections').delete().eq('api_id', api_id);
-      const toInsertSections = sections.map(s => ({ ...s, api_id }));
+      const toInsertSections = sections.map(s => {
+        const payload: any = {
+          id: s.id,
+          api_id,
+          type: s.type,
+          title: s.title,
+          content: s.content ?? {},
+          order: s.order
+        };
+        Object.keys(payload).forEach(k => {
+          if (payload[k] === undefined || payload[k] === null) delete payload[k];
+        });
+        return payload;
+      });
+      console.log('toInsertSections', toInsertSections);
       if (toInsertSections.length > 0) await supabase.from('api_sections').insert(toInsertSections);
       // 3. examples
       await supabase.from('api_examples').delete().eq('api_id', api_id);
@@ -810,7 +839,7 @@ const ApiEditPage: React.FC = () => {
           {/* 新增章節按鈕 */}
           <div className="flex gap-2">
             {SECTION_TYPES.filter(t => !sections.some(s => s.type === t.type)).map(t => (
-              <button key={t.type} className="flex items-center px-3 py-1 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-primary hover:border-primary/30 transition-colors text-sm" onClick={() => setSections(prev => ([...prev, { id: uuidv4(), type: t.type, title: t.label, content: getDefaultSectionContent(t.type), section_order: prev.length }]))}>
+              <button key={t.type} className="flex items-center px-3 py-1 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-primary hover:border-primary/30 transition-colors text-sm" onClick={() => setSections(prev => ([...prev, { id: uuidv4(), type: t.type, title: t.label, content: getDefaultSectionContent(t.type), order: prev.length }]))}>
                 <i className="ri-add-line mr-1"></i>
                 {t.label}
               </button>

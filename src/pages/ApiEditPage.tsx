@@ -15,10 +15,15 @@ interface Api {
   icon: string;
   usage_rate?: number;
   difficulty: string;
-  browser_support?: any;
-  browsers?: any;
-  slug?: string;
+  browsers?: {
+    icon: string;
+    label: string;
+    version: string;
+  }[];
+  doc_content: string;
   is_published?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 type SectionContent = OverviewContent | SyntaxContent | ParamsContent | MethodsContent | ExamplesContent | string;
@@ -688,94 +693,7 @@ const ApiEditPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">{isEdit ? '編輯 API 文檔' : '新增 API 文檔'}</h1>
           <div className={`status-indicator ${message ? 'show' : 'hide'} text-sm text-gray-500`}>{message}</div>
         </div>
-        {/* API 基本資料表單 */}
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">API 名稱</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              value={api.name}
-              onChange={e => setApi({ ...api, name: e.target.value })}
-              placeholder="請輸入 API 名稱"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">分類</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              value={api.category}
-              onChange={e => setApi({ ...api, category: e.target.value })}
-              placeholder="請輸入分類"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">簡短描述</label>
-            <textarea
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none min-h-[48px]"
-              value={api.description}
-              onChange={e => setApi({ ...api, description: e.target.value })}
-              placeholder="請輸入 API 簡短描述"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">標籤</label>
-            <div className="flex flex-wrap gap-2">
-              {api.tags.map((tag, idx) => (
-                <span key={idx} className="flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
-                  <input
-                    className="bg-transparent border-none outline-none w-16"
-                    value={tag}
-                    onChange={e => {
-                      const tags = [...api.tags];
-                      tags[idx] = e.target.value;
-                      setApi({ ...api, tags });
-                    }}
-                    placeholder="標籤"
-                  />
-                  <button
-                    type="button"
-                    className="ml-1 text-gray-400 hover:text-red-400"
-                    onClick={() => {
-                      const tags = api.tags.filter((_, i) => i !== idx);
-                      setApi({ ...api, tags });
-                    }}
-                  >
-                    <i className="ri-close-line"></i>
-                  </button>
-                </span>
-              ))}
-              <button
-                type="button"
-                className="px-2 py-1 text-gray-500 hover:text-primary"
-                onClick={() => setApi({ ...api, tags: [...api.tags, ''] })}
-              >
-                <i className="ri-add-line"></i>
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">難度</label>
-            <select
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              value={api.difficulty}
-              onChange={e => setApi({ ...api, difficulty: e.target.value })}
-            >
-              <option value="">請選擇</option>
-              <option value="beginner">初級</option>
-              <option value="intermediate">中級</option>
-              <option value="advanced">進階</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Icon</label>
-            <input
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              value={api.icon}
-              onChange={e => setApi({ ...api, icon: e.target.value })}
-              placeholder="Remixicon class，如 ri-wifi-line"
-            />
-          </div>
-        </div>
+        {/* API 基本資料表單（已移除，統一由概述章節編輯） */}
         {/* 章節編輯區 */}
         <div className="mb-8">
           {SECTION_TYPES.filter(t => sections.some(s => s.type === t.type)).map((t, idx) => {

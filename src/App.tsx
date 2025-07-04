@@ -3,6 +3,7 @@ import CollectionsPage from './pages/CollectionsPage';
 import HomePage from './pages/HomePage';
 import UpdatesPage from './pages/UpdatesPage';
 import ApiDetailPage from './pages/ApiDetailPage';
+import ApiEditPage from './pages/ApiEditPage';
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/updates" element={<UpdatesPage />} />
       <Route path="/api/:id" element={<ApiDetailPage />} />
+      <Route path="/admin/api/new" element={<ApiEditPage />} />
+      <Route path="/admin/api/:id/edit" element={<ApiEditPage />} />
     </Routes>
   );
 }

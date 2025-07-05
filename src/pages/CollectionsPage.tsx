@@ -19,10 +19,13 @@ export type Api = {
   usage: number;
   difficulty: string;
   description: string;
+  slug: string;
   tags: string[];
   favorite: boolean;
   browsers: { id: string; name: string; icon: string; version: string; supported: boolean }[];
   isFavorite: boolean;
+  important_note: string;
+  updated_at: string;
   // 其他欄位可依 supabase schema 擴充
 };
 

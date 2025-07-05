@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import MainContent from '../components/md/MainContent';
+import ImportantNote from '../components/md/ImportantNote';
 import ReactMarkdown from 'react-markdown';
-import mockDocMarkdown from './mockDoc.md?raw';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import * as remarkGfm from 'remark-gfm';
@@ -14,23 +13,6 @@ import { visit } from 'unist-util-visit';
 import type { Parent } from 'unist';
 import type { PhrasingContent } from 'mdast';
 import type { Api } from './CollectionsPage';
-
-// Mock 資料
-const mockApi = {
-  name: 'Fetch API',
-  icon: 'ri-exchange-line',
-  updated_at: '2025-06-15T00:00:00Z', // timestamp 字串
-  tags: ['網路', '非同步', 'JSON', 'HTTP', 'Promise'],
-  description: 'Fetch API 提供了一個用於獲取資源的介面，包括跨網路的非同步請求。它是 XMLHttpRequest 的現代替代方案，提供更強大和靈活的功能集。Fetch API 使用 Promise，這使得它的 API 更簡潔，並避免了回調地獄。',
-  browser: [
-    { id: 'chrome', name: 'Chrome', icon: 'ri-chrome-line', version: '42+', supported: true },
-    { id: 'firefox', name: 'Firefox', icon: 'ri-firefox-line', version: '39+', supported: true },
-    { id: 'edge', name: 'Edge', icon: 'ri-edge-line', version: '14+', supported: true },
-    { id: 'safari', name: 'Safari', icon: 'ri-safari-line', version: '10.1+', supported: true },
-    { id: 'opera', name: 'Opera', icon: 'ri-opera-line', version: '29+', supported: true },
-    { id: 'ie', name: 'IE', icon: 'ri-ie-line', version: '不支援', supported: false },
-  ]
-};
 
 // mock 使用範例
 const mockExamples = [
@@ -179,21 +161,8 @@ const ApiDetailPage: React.FC = () => {
   const [apis, setApis] = useState<Api | null>(null);
   const [tocActive, setTocActive] = useState('overview');
   const [loading, setLoading] = useState(false);
-
-  // 只取主 markdown 的 H2/H3
-  const mainToc = extractToc(mockDocMarkdown);
-  // 過濾掉和固定區塊重複的 id
-  const filteredMainToc = mainToc.filter(t => !fixedSections.some(f => f.id === t.id));
-  // TOC = 概述 + 相容性 + 主 markdown TOC (H2/H3) + 其他固定區塊
-  const toc = [
-    fixedSections[0], // 概述
-    fixedSections[1], // 瀏覽器相容性
-    ...filteredMainToc,
-    fixedSections[2], // 使用範例
-    fixedSections[3], // 常見問題
-    fixedSections[4], // 相關資源
-    fixedSections[5], // 相關 API
-  ];
+  const [markdown, setMarkdown] = useState<string>('');
+  const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>([]);
 
   useEffect(() => {
     // 載入 API 詳細資料
@@ -207,8 +176,37 @@ const ApiDetailPage: React.FC = () => {
       if (error) {
         console.error('API Detail fetch error:', error);
       } else {
-        console.log('API Detail:', data);
         setApis(data);
+        console.log('data', data);
+        // 動態 import markdown
+        if (data && data.slug) {
+          import(`../docs/${data.slug}.md?raw`).then(mod => {
+            setMarkdown(mod.default || '');
+            // 產生 TOC
+            const tocData = extractToc(mod.default || '');
+            // 過濾掉和固定區塊重複的 id
+            const filteredMainToc = tocData.filter(t => !fixedSections.some(f => f.id === t.id));
+            setToc([
+              fixedSections[0],
+              fixedSections[1],
+              ...filteredMainToc,
+              fixedSections[2],
+              fixedSections[3],
+              fixedSections[4],
+              fixedSections[5],
+            ]);
+          }).catch(() => {
+            setMarkdown('找不到對應的說明文件');
+            setToc([
+              fixedSections[0],
+              fixedSections[1],
+              fixedSections[2],
+              fixedSections[3],
+              fixedSections[4],
+              fixedSections[5],
+            ]);
+          });
+        }
       }
       setLoading(false);
     };
@@ -229,12 +227,12 @@ const ApiDetailPage: React.FC = () => {
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center mb-2">
           <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full flex-shrink-0 mr-2">
-            <i className={`${mockApi.icon} ri-xl`}></i>
+            <i className={`${apis?.icon} ri-xl`}></i>
           </div>
-          <h2 className="code-font font-medium text-gray-900">{mockApi.name}</h2>
+          <h2 className="code-font font-medium text-gray-900">{apis?.name}</h2>
         </div>
         <div className="flex items-center text-xs text-gray-500 mb-3">
-          <span>更新: {formatDate(mockApi.updated_at)}</span>
+          <span>更新: {formatDate(apis?.updated_at)}</span>
         </div>
         <div className="relative">
           <input type="text" placeholder="搜尋文檔..." className="w-full pl-8 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50" />
@@ -249,7 +247,6 @@ const ApiDetailPage: React.FC = () => {
             // 找出上一個 H2
             let parentH2Idx = idx;
             while (parentH2Idx >= 0 && toc[parentH2Idx].level !== 2) parentH2Idx--;
-            const parentH2 = toc[parentH2Idx];
             const isActive = tocActive === item.id;
             // 目前 active 的 idx
             const tocActiveIdx = toc.findIndex(t => t.id === tocActive);
@@ -319,11 +316,11 @@ const ApiDetailPage: React.FC = () => {
             <div className="mx-2 text-gray-400">
               <i className="ri-arrow-right-s-line"></i>
             </div>
-            <span className="text-gray-900 font-medium">{mockApi.name}</span>
+            <span className="text-gray-900 font-medium">{apis?.name}</span>
           </nav>
           <div className="max-w-4xl mx-auto px-4 py-8">
             <div className="flex items-center justify-between mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 code-font">{mockApi.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 code-font">{apis?.name}</h1>
               <div className="flex space-x-2">
                 <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-primary bg-gray-50 hover:bg-gray-100 rounded-full transition-colors">
                   <i className="ri-bookmark-line"></i>
@@ -337,33 +334,21 @@ const ApiDetailPage: React.FC = () => {
             <section id="overview" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-full flex-shrink-0 mr-3">
-                  <i className={`${mockApi.icon} ri-xl`}></i>
+                  <i className={`${apis?.icon} ri-xl`}></i>
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">概述</h2>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {mockApi.tags.map(tag => (
+                    {apis?.tags.map(tag => (
                       <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">{tag}</span>
                     ))}
                   </div>
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{mockApi.description}</p>
-              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
-                <div className="flex">
-                  <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center text-blue-500 mt-0.5">
-                    <i className="ri-information-line"></i>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-blue-800">重要提示</h3>
-                    <div className="mt-2 text-sm text-blue-700">
-                      <p>
-                        Fetch API 返回的 Promise <strong>不會</strong> 因 HTTP 錯誤狀態（如 404 或 500）而被拒絕。相反，它會正常解析，只有在網路故障或請求被阻止時才會被拒絕。因此，檢查 <code className="code-font bg-blue-100 px-1 py-0.5 rounded text-blue-800">response.ok</code> 和 <code className="code-font bg-blue-100 px-1 py-0.5 rounded text-blue-800">response.status</code> 是很重要的。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <p className="text-gray-700 mb-4">{apis?.description}</p>
+              {apis?.important_note && (
+                <ImportantNote>{apis?.important_note}</ImportantNote>
+              )}
             </section>
             {/* 相容性區塊（移到概述下方） */}
             <section id="compatibility" className="mb-12" style={{ scrollMarginTop: '72px' }}>
@@ -395,128 +380,10 @@ const ApiDetailPage: React.FC = () => {
               </div>
             </section>
             {/* 主文件內容 markdown 區塊（完全還原 HTML 樣式，支援高亮） */}
-            <section id="syntax" className="mb-12 prose prose-slate max-w-none">
-              <ReactMarkdown
-                components={{
-                  code(props) {
-                    const { className, children, ...rest } = props as { className?: string; children: React.ReactNode };
-                    if (className === undefined) {
-                      return (
-                        <code
-                          className="code-font bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 text-sm"
-                          style={{
-                            fontFamily: '"Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace',
-                            background: '#f3f4f6',
-                            borderRadius: '0.3em',
-                            padding: '0.2em 0.4em',
-                            fontSize: '.85rem',
-                          }}
-                          {...rest}
-                        >
-                          {children}
-                        </code>
-                      );
-                    }
-                    const match = /language-(\w+)/.exec(className || '');
-                    return (
-                      <pre
-                        style={{
-                          background: '#fafafa',
-                          color: '#383a42',
-                          fontFamily: '"Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace',
-                          borderRadius: '0.3em',
-                          padding: '1em',
-                          margin: '0.5em 0',
-                          overflow: 'auto',
-                        }}
-                      >
-                        <code
-                          className={className}
-                          style={{
-                            background: 'inherit',
-                            color: 'inherit',
-                            fontFamily: 'inherit',
-                            fontSize: '.85rem',
-                            whiteSpace: 'pre',
-                          }}
-                          {...rest}
-                        >
-                          <SyntaxHighlighter
-                            style={oneLight}
-                            language={match ? match[1] : ''}
-                            PreTag="div"
-                            customStyle={{
-                              background: 'inherit',
-                              color: 'inherit',
-                              fontFamily: 'inherit',
-                              fontSize: 'inherit',
-                              margin: 0,
-                              padding: 0,
-                            }}
-                            codeTagProps={{
-                              style: {
-                                background: 'inherit',
-                                color: 'inherit',
-                                fontFamily: 'inherit',
-                                fontSize: 'inherit',
-                                padding: 0,
-                                margin: 0,
-                              }
-                            }}
-                          >
-                            {String(children).replace(/\n$/, '')}
-                          </SyntaxHighlighter>
-                        </code>
-                      </pre>
-                    );
-                  },
-                  h2({ children, ...props }) {
-                    const text = String(children);
-                    const id = text
-                      .toLowerCase()
-                      .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-                      .replace(/^-+|-+$/g, '');
-                    return <h2 id={id} style={{ scrollMarginTop: '72px' }} {...props}>{children}</h2>;
-                  },
-                  h3({ children, ...props }) {
-                    const text = String(children);
-                    const id = text
-                      .toLowerCase()
-                      .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
-                      .replace(/^-+|-+$/g, '');
-                    return <h3 id={id} style={{ scrollMarginTop: '72px' }} {...props}>{children}</h3>;
-                  },
-                  blockquote(props) {
-                    return <blockquote className="border-l-4 border-gray-300 pl-4 text-gray-700 my-4" {...props} />;
-                  },
-                  a(props) {
-                    return <a className="text-primary underline hover:text-primary/80" {...props} />;
-                  },
-                  ul(props) {
-                    return <ul className="list-disc list-inside space-y-1 text-gray-700" {...props} />;
-                  },
-                  ol(props) {
-                    return <ol className="list-decimal list-inside space-y-1 text-gray-700" {...props} />;
-                  },
-                  li(props) {
-                    return <li className="mb-1" {...props} />;
-                  },
-                  table(props) {
-                    return <table className="min-w-full border border-gray-200 rounded-lg my-4" {...props} />;
-                  },
-                  th(props) {
-                    return <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b" {...props} />;
-                  },
-                  td(props) {
-                    return <td className="px-4 py-3 text-sm text-gray-700 border-r" {...props} />;
-                  },
-                  p(props) {
-                    return <p className="text-gray-700 mb-4" {...props} />;
-                  },
-                }}
-              >
-                {mockDocMarkdown}
-              </ReactMarkdown>
+            <section id="syntax" className="mb-12">
+              <MainContent>
+                {markdown}
+              </MainContent>
             </section>
             {/* 使用範例區塊 */}
             <section id="examples" className="mb-12" style={{ scrollMarginTop: '72px' }}>

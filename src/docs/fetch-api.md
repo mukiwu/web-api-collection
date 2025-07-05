@@ -1,6 +1,8 @@
 ## 語法
 
-`fetch(resource, options)`
+```js
+fetch(resource, options)
+```
 
 ## 參數
 

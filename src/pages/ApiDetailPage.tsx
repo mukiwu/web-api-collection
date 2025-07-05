@@ -16,12 +16,18 @@ import type { PhrasingContent } from 'mdast';
 // Mock 資料
 const mockApi = {
   name: 'Fetch API',
-  icon: 'ri-wifi-line',
-  difficulty: '初級',
-  usage: '92%',
-  updated: '2025-06-15',
+  icon: 'ri-exchange-line',
+  updated_at: '2025-06-15T00:00:00Z', // timestamp 字串
   tags: ['網路', '非同步', 'JSON', 'HTTP', 'Promise'],
   description: 'Fetch API 提供了一個用於獲取資源的介面，包括跨網路的非同步請求。它是 XMLHttpRequest 的現代替代方案，提供更強大和靈活的功能集。Fetch API 使用 Promise，這使得它的 API 更簡潔，並避免了回調地獄。',
+  browser: [
+    { id: 'chrome', name: 'Chrome', icon: 'ri-chrome-line', version: '42+', supported: true },
+    { id: 'firefox', name: 'Firefox', icon: 'ri-firefox-line', version: '39+', supported: true },
+    { id: 'edge', name: 'Edge', icon: 'ri-edge-line', version: '14+', supported: true },
+    { id: 'safari', name: 'Safari', icon: 'ri-safari-line', version: '10.1+', supported: true },
+    { id: 'opera', name: 'Opera', icon: 'ri-opera-line', version: '29+', supported: true },
+    { id: 'ie', name: 'IE', icon: 'ri-ie-line', version: '不支援', supported: false },
+  ]
 };
 
 // mock 使用範例
@@ -101,16 +107,6 @@ const mockResources = [
   },
 ];
 
-// mock 相容性
-const mockCompat = [
-  { id: 'chrome', name: 'Chrome', icon: 'ri-chrome-line', version: '42+', supported: true },
-  { id: 'firefox', name: 'Firefox', icon: 'ri-firefox-line', version: '39+', supported: true },
-  { id: 'edge', name: 'Edge', icon: 'ri-edge-line', version: '14+', supported: true },
-  { id: 'safari', name: 'Safari', icon: 'ri-safari-line', version: '10.1+', supported: true },
-  { id: 'opera', name: 'Opera', icon: 'ri-opera-line', version: '29+', supported: true },
-  { id: 'ie', name: 'IE', icon: 'ri-ie-line', version: '不支援', supported: false },
-];
-
 // mock 相關 API
 const mockRelatedApis = [
   {
@@ -148,6 +144,13 @@ const fixedSections = [
   { id: 'compatibility', text: '瀏覽器相容性', level: 2 },
   { id: 'related-apis', text: '相關 API', level: 2 },
 ];
+
+// 工具函式：timestamp 轉 YYYY.MM.DD
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function extractToc(markdown: string) {
   const toc: { id: string; text: string; level: number }[] = [];
@@ -201,12 +204,12 @@ const ApiDetailPage: React.FC = () => {
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center mb-2">
           <div className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary rounded-full flex-shrink-0 mr-2">
-            <i className={mockApi.icon}></i>
+            <i className={`${mockApi.icon} ri-xl`}></i>
           </div>
           <h2 className="code-font font-medium text-gray-900">{mockApi.name}</h2>
         </div>
         <div className="flex items-center text-xs text-gray-500 mb-3">
-          <span>更新: {mockApi.updated}</span>
+          <span>更新: {formatDate(mockApi.updated_at)}</span>
         </div>
         <div className="relative">
           <input type="text" placeholder="搜尋文檔..." className="w-full pl-8 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50" />
@@ -299,7 +302,7 @@ const ApiDetailPage: React.FC = () => {
             <section id="overview" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <div className="flex items-center mb-4">
                 <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-full flex-shrink-0 mr-3">
-                  <i className="ri-wifi-line ri-lg"></i>
+                  <i className={`${mockApi.icon} ri-xl`}></i>
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900">概述</h2>
@@ -519,7 +522,7 @@ const ApiDetailPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {mockCompat.map(b => (
+                    {mockApi.browser.map(b => (
                       <tr key={b.id} className="border-t border-gray-100">
                         <td className="flex items-center px-4 py-2 text-gray-900">
                           <i className={`${b.icon} text-xl mr-2 ${b.supported ? 'text-primary' : 'text-gray-400'}`}></i>

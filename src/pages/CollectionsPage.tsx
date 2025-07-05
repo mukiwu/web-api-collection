@@ -11,13 +11,6 @@ const categories = [
   '全部', 'DOM', '網路', '儲存', '裝置', '多媒體', '效能', '圖形', '通知', '檔案', '背景處理', '安全', '其他'
 ];
 
-// 假資料：難度
-const difficultyMap: Record<string, { label: string; color: string }> = {
-  beginner: { label: '初級', color: 'bg-green-100 text-green-700' },
-  intermediate: { label: '中級', color: 'bg-orange-100 text-orange-700' },
-  advanced: { label: '進階', color: 'bg-red-100 text-red-700' },
-};
-
 export type Api = {
   id: string;
   name: string;
@@ -28,16 +21,14 @@ export type Api = {
   description: string;
   tags: string[];
   favorite: boolean;
-  browsers?: { icon: string; label: string }[];
+  browsers?: { id: string; name: string; icon: string; version: string; supported: boolean }[];
   isFavorite?: boolean;
   // 其他欄位可依 supabase schema 擴充
 };
 
-// 工具函式：label 若含「不支援」則顯示「不支援」，否則只取版本號
-function browserSupportText(label: string) {
-  if (label.includes('不支援')) return '不支援';
-  const match = label.match(/(\d+\+|\d+\.\d+\+|\d+)/);
-  return match ? match[0] : label;
+// 工具函式：根據 supported 顯示版本或『不支援』
+function browserSupportText(version: string, supported: boolean) {
+  return supported ? version : '不支援';
 }
 
 const CollectionsPage: React.FC = () => {
@@ -183,35 +174,32 @@ const CollectionsPage: React.FC = () => {
                       <div>
                         <h3 className="code-font font-medium text-gray-900 text-lg">{api.name}</h3>
                         <div className="flex items-center mt-1 space-x-2">
-                          <span className="text-xs text-gray-500">使用率: {api.usage ?? '--'}%</span>
-                          <span className={`difficulty-badge ${difficultyMap[api.difficulty]?.color || 'bg-gray-100 text-gray-500'}`}>{difficultyMap[api.difficulty]?.label || '未知'}</span>
+                          {api.tags.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full">{tag}</span>
+                          ))}
                         </div>
                       </div>
                     </div>
                     <ApiFavoriteButton apiId={api.id} />
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">{api.description}</p>
+                  <p className="text-sm text-gray-600 mb-4" dangerouslySetInnerHTML={{ __html: api.description.replace(/\n/g, '<br />') }} />
                   {/* 瀏覽器相容性區塊 */}
                   {Array.isArray(api.browsers) && api.browsers.length > 0 && (
-                    <div className="mb-4">
+                    <div className="mb-4 border-t border-gray-100 pt-4">
                       <h4 className="code-font text-sm font-medium text-gray-700 mb-2">瀏覽器相容性</h4>
                       <div className="flex flex-wrap justify-between md:flex-nowrap gap-3 md:gap-4">
                         {api.browsers.map(b => (
-                          <div key={b.label} className="browser-icon flex flex-col items-center text-xs md:text-sm">
-                            <div className="w-8 h-8 flex items-center justify-center text-gray-700">
-                              <i className={`${b.icon} ri-lg md:ri-2x`}></i>
+                          <div key={b.id} className="browser-icon flex flex-col items-center text-xs">
+                            <div className={`w-8 h-8 flex items-center justify-center ${b.supported ? 'text-gray-700' : 'text-gray-300'}`}>
+                              <i className={`${b.icon} ri-xl`}></i>
                             </div>
-                            <span className="text-gray-600">{browserSupportText(b.label)}</span>
+                            <span className={`${b.supported ? 'text-gray-600' : 'text-gray-400'}`}>{b.name}</span>
+                            <span className={`${b.supported ? 'text-gray-600' : 'text-gray-400'}`}>{browserSupportText(b.version, b.supported)}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {api.tags && api.tags.map(tag => (
-                      <span key={tag} className="tag">{tag}</span>
-                    ))}
-                  </div>
                 </div>
               </div>
             ))}

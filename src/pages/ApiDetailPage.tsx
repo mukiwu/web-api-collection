@@ -368,24 +368,26 @@ const ApiDetailPage: React.FC = () => {
             {/* 相容性區塊（移到概述下方） */}
             <section id="compatibility" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <i className="ri-shield-check-line text-primary mr-2"></i> 瀏覽器相容性
+                瀏覽器相容性
               </h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full border border-gray-200 rounded-lg bg-white">
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">瀏覽器</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">支援版本</th>
+                      <th className="pl-4 py-2 text-left text-gray-700">瀏覽器</th>
+                      <th className="py-2 text-left text-gray-700">支援版本</th>
                     </tr>
                   </thead>
                   <tbody>
                     {apis?.browsers.map(b => (
-                      <tr key={b.id} className="border-t border-gray-100">
-                        <td className="flex items-center px-4 py-2 text-gray-900">
-                          <i className={`${b.icon} text-xl mr-2 ${b.supported ? 'text-primary' : 'text-gray-400'}`}></i>
+                      <tr key={b.id} className="border-t border-gray-100 text-sm">
+                        <td className="flex items-center px-4 py-2 text-gray-700">
+                          <i className={`${b.icon} ri-md mr-2 text-gray-700`}></i>
                           <span>{b.name}</span>
                         </td>
-                        <td className={`${b.supported ? 'text-green-700' : 'text-gray-400'}`}>{b.version}</td>
+                        <td className={`${b.supported ? 'text-gray-700' : 'text-gray-400'}`}>
+                          {b.supported ? b.version : '不支援'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

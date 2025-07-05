@@ -21,8 +21,8 @@ export type Api = {
   description: string;
   tags: string[];
   favorite: boolean;
-  browsers?: { id: string; name: string; icon: string; version: string; supported: boolean }[];
-  isFavorite?: boolean;
+  browsers: { id: string; name: string; icon: string; version: string; supported: boolean }[];
+  isFavorite: boolean;
   // 其他欄位可依 supabase schema 擴充
 };
 

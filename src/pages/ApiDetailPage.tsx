@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ReactMarkdown from 'react-markdown';
@@ -9,9 +9,11 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import * as remarkGfm from 'remark-gfm';
+import { supabase } from '../supabaseClient';
 import { visit } from 'unist-util-visit';
 import type { Parent } from 'unist';
 import type { PhrasingContent } from 'mdast';
+import type { Api } from './CollectionsPage';
 
 // Mock 資料
 const mockApi = {
@@ -138,11 +140,11 @@ const mockRelatedApis = [
 // 固定區塊標題
 const fixedSections = [
   { id: 'overview', text: '概述', level: 2 },
+  { id: 'compatibility', text: '瀏覽器相容性', level: 2 },
   { id: 'examples', text: '使用範例', level: 2 },
   { id: 'faq', text: '常見問題', level: 2 },
   { id: 'related', text: '相關資源', level: 2 },
-  { id: 'compatibility', text: '瀏覽器相容性', level: 2 },
-  { id: 'related-apis', text: '相關 API', level: 2 },
+  { id: 'related-apis', text: '相關 API', level: 2 }
 ];
 
 // 工具函式：timestamp 轉 YYYY.MM.DD
@@ -173,22 +175,45 @@ function extractToc(markdown: string) {
 
 const ApiDetailPage: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const [apis, setApis] = useState<Api | null>(null);
   const [tocActive, setTocActive] = useState('overview');
+  const [loading, setLoading] = useState(false);
 
   // 只取主 markdown 的 H2/H3
   const mainToc = extractToc(mockDocMarkdown);
   // 過濾掉和固定區塊重複的 id
   const filteredMainToc = mainToc.filter(t => !fixedSections.some(f => f.id === t.id));
-  // TOC = 概述 + 主 markdown TOC (H2/H3) + 其他固定區塊
+  // TOC = 概述 + 相容性 + 主 markdown TOC (H2/H3) + 其他固定區塊
   const toc = [
     fixedSections[0], // 概述
+    fixedSections[1], // 瀏覽器相容性
     ...filteredMainToc,
-    fixedSections[1], // 使用範例
-    fixedSections[2], // 常見問題
-    fixedSections[3], // 相關資源
-    fixedSections[4], // 瀏覽器相容性
+    fixedSections[2], // 使用範例
+    fixedSections[3], // 常見問題
+    fixedSections[4], // 相關資源
     fixedSections[5], // 相關 API
   ];
+
+  useEffect(() => {
+    // 載入 API 詳細資料
+    const fetchApiDetail = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('apis_with_favorite_count')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (error) {
+        console.error('API Detail fetch error:', error);
+      } else {
+        console.log('API Detail:', data);
+        setApis(data);
+      }
+      setLoading(false);
+    };
+    if (id) fetchApiDetail();
+  }, [id]);
 
   // 側邊欄目錄元件
   const TableOfContents = () => (
@@ -266,6 +291,16 @@ const ApiDetailPage: React.FC = () => {
     </aside>
   );
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center text-gray-400 text-lg">載入中...</div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -328,6 +363,33 @@ const ApiDetailPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </section>
+            {/* 相容性區塊（移到概述下方） */}
+            <section id="compatibility" className="mb-12" style={{ scrollMarginTop: '72px' }}>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <i className="ri-shield-check-line text-primary mr-2"></i> 瀏覽器相容性
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-200 rounded-lg bg-white">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">瀏覽器</th>
+                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">支援版本</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {apis?.browsers.map(b => (
+                      <tr key={b.id} className="border-t border-gray-100">
+                        <td className="flex items-center px-4 py-2 text-gray-900">
+                          <i className={`${b.icon} text-xl mr-2 ${b.supported ? 'text-primary' : 'text-gray-400'}`}></i>
+                          <span>{b.name}</span>
+                        </td>
+                        <td className={`${b.supported ? 'text-green-700' : 'text-gray-400'}`}>{b.version}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
             {/* 主文件內容 markdown 區塊（完全還原 HTML 樣式，支援高亮） */}
@@ -508,33 +570,6 @@ const ApiDetailPage: React.FC = () => {
                 ))}
               </div>
             </section>
-            {/* 相容性區塊 */}
-            <section id="compatibility" className="mb-12" style={{ scrollMarginTop: '72px' }}>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <i className="ri-shield-check-line text-primary mr-2"></i> 瀏覽器相容性
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full border border-gray-200 rounded-lg bg-white">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">瀏覽器</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">支援版本</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockApi.browser.map(b => (
-                      <tr key={b.id} className="border-t border-gray-100">
-                        <td className="flex items-center px-4 py-2 text-gray-900">
-                          <i className={`${b.icon} text-xl mr-2 ${b.supported ? 'text-primary' : 'text-gray-400'}`}></i>
-                          <span>{b.name}</span>
-                        </td>
-                        <td className={`px-4 py-2 ${b.supported ? 'text-green-700' : 'text-gray-400'}`}>{b.version}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
             {/* 相關 API 區塊 */}
             <section id="related-apis" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
@@ -622,4 +657,4 @@ function RelatedApiCard({ api }: { api: { id: string; name: string; icon: string
   );
 }
 
-export default ApiDetailPage; 
+export default ApiDetailPage;

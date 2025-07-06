@@ -159,6 +159,7 @@ const ApiDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [apis, setApis] = useState<Api | null>(null);
+  const [apiFaq, setApiFaq] = useState<{ id: string; question: string; answer: string }[]>([]);
   const [tocActive, setTocActive] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [markdown, setMarkdown] = useState<string>('');
@@ -210,7 +211,22 @@ const ApiDetailPage: React.FC = () => {
       }
       setLoading(false);
     };
-    if (id) fetchApiDetail();
+    const fetchApiFaq = async () => {
+      const { data, error } = await supabase
+        .from('api_faqs')
+        .select('*')
+        .eq('api_id', id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('API FAQ fetch error:', error);
+      } else {
+        setApiFaq(data);
+      }
+    }
+    if (id) {
+      fetchApiDetail();
+      fetchApiFaq()
+    }
   }, [id]);
 
   // 側邊欄目錄元件
@@ -232,7 +248,7 @@ const ApiDetailPage: React.FC = () => {
           <h2 className="code-font font-medium text-gray-900">{apis?.name}</h2>
         </div>
         <div className="flex items-center text-xs text-gray-500 mb-3">
-          <span>更新: {formatDate(apis?.updated_at)}</span>
+          <span>更新: {formatDate(apis?.updated_at || '')}</span>
         </div>
         <div className="relative">
           <input type="text" placeholder="搜尋文檔..." className="w-full pl-8 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50" />
@@ -416,7 +432,7 @@ const ApiDetailPage: React.FC = () => {
             <section id="faq" className="mb-12" style={{ scrollMarginTop: '72px' }}>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">常見問題</h2>
               <div className="space-y-6">
-                {mockFaqs.map(faq => (
+                {apiFaq.map(faq => (
                   <FaqCard key={faq.id} faq={faq} />
                 ))}
               </div>
@@ -465,23 +481,23 @@ const ApiDetailPage: React.FC = () => {
 };
 
 // FAQ 卡片元件
-function FaqCard({ faq }: { faq: { id: string; q: string; a: string } }) {
+function FaqCard({ faq }: { faq: { id: string; question: string; answer: string } }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
-    navigator.clipboard.writeText(faq.a);
+    navigator.clipboard.writeText(faq.answer);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
       <button
-        className="flex items-center w-full text-left focus:outline-none"
+        className="flex items-center w-full text-left focus:outline-none hover:cursor-pointer"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
       >
-        <i className={`ri-question-line text-lg text-primary mr-3 transition-transform ${open ? 'rotate-90' : ''}`}></i>
-        <span className="text-lg font-medium text-gray-900 flex-1">{faq.q}</span>
+        <i className="ri-question-line text-lg text-primary mr-3"></i>
+        <span className="text-lg font-medium text-gray-900 flex-1">{faq.question}</span>
         <i className={`ri-arrow-down-s-line ml-2 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}></i>
       </button>
       {open && (
@@ -498,7 +514,7 @@ function FaqCard({ faq }: { faq: { id: string; q: string; a: string } }) {
             </button>
           </div>
           <div className="prose prose-slate max-w-none text-sm">
-            <ReactMarkdown>{faq.a}</ReactMarkdown>
+            <ReactMarkdown>{faq.answer}</ReactMarkdown>
           </div>
         </div>
       )}

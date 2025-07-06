@@ -345,7 +345,12 @@ const ApiDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-700 mb-4">{apis?.description}</p>
+              <p
+                className="text-gray-700 mb-4"
+                dangerouslySetInnerHTML={{
+                  __html: apis?.description?.replace(/\n/g, '<br />') || ''
+                }}
+              />
               {apis?.important_note && (
                 <ImportantNote>{apis?.important_note}</ImportantNote>
               )}

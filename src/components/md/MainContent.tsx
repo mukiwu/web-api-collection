@@ -91,7 +91,7 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => (
             .toLowerCase()
             .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
             .replace(/^-+|-+$/g, '');
-          return <h2 id={id} className="text-xl font-semibold text-gray-900 mb-4" style={{ scrollMarginTop: '72px' }} {...props}>{children}</h2>;
+          return <h2 id={id} className="text-xl font-semibold text-gray-900 mt-12 mb-4" style={{ scrollMarginTop: '72px' }} {...props}>{children}</h2>;
         },
         h3({ children, ...props }) {
           const text = String(children);
@@ -99,7 +99,7 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => (
             .toLowerCase()
             .replace(/[^\w\u4e00-\u9fa5]+/g, '-')
             .replace(/^-+|-+$/g, '');
-          return <h3 id={id} style={{ scrollMarginTop: '72px' }} {...props}>{children}</h3>;
+          return <h3 id={id} className="text-lg font-medium text-gray-900 mb-3" style={{ scrollMarginTop: '72px' }} {...props}>{children}</h3>;
         },
         blockquote(props) {
           return <blockquote className="border-l-4 border-gray-300 pl-4 text-gray-700 my-4" {...props} />;
@@ -108,7 +108,7 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => (
           return <a className="text-primary underline hover:text-primary/80" {...props} />;
         },
         ul(props) {
-          return <ul className="list-disc list-inside space-y-1 text-gray-700" {...props} />;
+          return <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2" {...props} />;
         },
         ol(props) {
           return <ol className="list-decimal list-inside space-y-1 text-gray-700" {...props} />;
@@ -118,7 +118,7 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => (
         },
         table({ children, ...props }) {
           return (
-            <table className="min-w-full border border-gray-200 rounded-lg my-4" {...props}>
+            <table className="min-w-full border border-gray-200 rounded-lg" {...props}>
               {children}
             </table>
           );
@@ -127,16 +127,16 @@ const MainContent: React.FC<MainContentProps> = ({ children }) => (
           return <thead className="bg-gray-50">{children}</thead>;
         },
         tbody({ children }) {
-          return <tbody>{children}</tbody>;
+          return <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>;
         },
         tr({ children }) {
-          return <tr className="border-t border-gray-100">{children}</tr>;
+          return <tr>{children}</tr>;
         },
         th({ children, ...props }) {
-          return <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b" {...props}>{children}</th>;
+          return <th className="px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider border-gray-200 border-b" {...props}>{children}</th>;
         },
         td({ children, ...props }) {
-          return <td className="px-4 py-3 text-sm text-gray-700 border-r" {...props}>{children}</td>;
+          return <td className="px-4 py-3 text-sm text-gray-700 border-gray-200 border-r" {...props}>{children}</td>;
         },
         p(props) {
           return <p className="text-gray-700 mb-4" {...props} />;

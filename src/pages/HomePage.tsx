@@ -94,7 +94,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <span>探索熱門 API</span>
               </a>
-              <a href="#" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center whitespace-nowrap">
+              {/* <a href="#" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center whitespace-nowrap">
                 <div className="w-5 h-5 flex items-center justify-center mr-2">
                   <i className="ri-book-open-line"></i>
                 </div>
@@ -105,7 +105,7 @@ const HomePage: React.FC = () => {
                   <i className="ri-file-list-3-line"></i>
                 </div>
                 <span>API 資源集</span>
-              </a>
+              </a> */}
             </div>
           </div>
         </div>
@@ -132,110 +132,10 @@ const HomePage: React.FC = () => {
       </section>
       {/* 最新更新的 API 區塊 */}
       <UpdatesSection />
-      {/* 精選 API 教學區塊 */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">精選 API 教學</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">透過我們精心準備的教學內容，快速掌握各種 Web API 的使用方法和最佳實踐</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* 教學卡片 1 */}
-            <div className="tutorial-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="relative h-48 overflow-hidden">
-                <img src="https://readdy.ai/api/search-image?query=code%20editor%20with%20javascript%20syntax%20highlighting%2C%20showing%20web%20animation%20code%20example%2C%20clean%20modern%20interface%2C%20soft%20blue%20lighting%2C%20professional%20development%20environment&width=600&height=400&seq=tutorial1&orientation=landscape" alt="Web Animations API 教學" className="w-full h-full object-cover object-top" />
-                <div className="absolute top-3 left-3 flex space-x-2">
-                  <span className="difficulty-badge difficulty-intermediate">中級</span>
-                  <span className="bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full">15 分鐘</span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">使用 Web Animations API 創建流暢動畫</h3>
-                <p className="text-sm text-gray-600 mb-4">學習如何使用 Web Animations API 創建複雜的關鍵幀動畫，並實現精確的動畫控制。</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="tag">Animation</span>
-                  <span className="tag">Tutorial</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
-                      <img src="https://readdy.ai/api/search-image?query=professional%20asian%20male%20developer%20portrait%2C%20simple%20background%2C%20high%20quality%2C%20professional%20headshot&width=100&height=100&seq=author1&orientation=squarish" alt="作者頭像" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-sm text-gray-700">陳志明</span>
-                  </div>
-                  <span className="text-xs text-gray-500">2025-06-30</span>
-                </div>
-              </div>
-            </div>
-            {/* 教學卡片 2 */}
-            <div className="tutorial-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="relative h-48 overflow-hidden">
-                <img src="https://readdy.ai/api/search-image?query=modern%20web%20application%20showing%20local%20storage%20usage%2C%20browser%20developer%20tools%20open%2C%20clean%20interface%2C%20data%20visualization%20of%20storage%2C%20professional%20development%20environment&width=600&height=400&seq=tutorial2&orientation=landscape" alt="Web Storage API 教學" className="w-full h-full object-cover object-top" />
-                <div className="absolute top-3 left-3 flex space-x-2">
-                  <span className="difficulty-badge difficulty-beginner">初級</span>
-                  <span className="bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full">10 分鐘</span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Web Storage API 實用指南</h3>
-                <p className="text-sm text-gray-600 mb-4">深入了解 localStorage 和 sessionStorage 的使用方法，以及如何有效管理網頁應用中的客戶端資料。</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="tag">Storage</span>
-                  <span className="tag">Beginner</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
-                      <img src="https://readdy.ai/api/search-image?query=professional%20asian%20female%20developer%20portrait%2C%20simple%20background%2C%20high%20quality%2C%20professional%20headshot&width=100&height=100&seq=author2&orientation=squarish" alt="作者頭像" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-sm text-gray-700">林佳穎</span>
-                  </div>
-                  <span className="text-xs text-gray-500">2025-06-28</span>
-                </div>
-              </div>
-            </div>
-            {/* 教學卡片 3 */}
-            <div className="tutorial-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="relative h-48 overflow-hidden">
-                <img src="https://readdy.ai/api/search-image?query=web%20application%20showing%20geolocation%20map%20interface%2C%20with%20location%20tracking%2C%20clean%20modern%20design%2C%20map%20markers%20and%20user%20interface%20elements%2C%20professional%20development%20environment&width=600&height=400&seq=tutorial3&orientation=landscape" alt="Geolocation API 教學" className="w-full h-full object-cover object-top" />
-                <div className="absolute top-3 left-3 flex space-x-2">
-                  <span className="difficulty-badge difficulty-advanced">進階</span>
-                  <span className="bg-white/90 text-gray-800 text-xs px-2 py-1 rounded-full">25 分鐘</span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">打造位置感知的網頁應用</h3>
-                <p className="text-sm text-gray-600 mb-4">使用 Geolocation API 結合地圖服務，創建具有位置感知功能的現代網頁應用。</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="tag">Geolocation</span>
-                  <span className="tag">Maps</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
-                      <img src="https://readdy.ai/api/search-image?query=professional%20asian%20male%20developer%20portrait%2C%20different%20person%2C%20simple%20background%2C%20high%20quality%2C%20professional%20headshot&width=100&height=100&seq=author3&orientation=squarish" alt="作者頭像" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-sm text-gray-700">王建國</span>
-                  </div>
-                  <span className="text-xs text-gray-500">2025-06-25</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-12 text-center">
-            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap">
-              <div className="w-5 h-5 flex items-center justify-center mr-2">
-                <i className="ri-book-open-line"></i>
-              </div>
-              <span>瀏覽所有教學</span>
-            </a>
-          </div>
-        </div>
-      </section>
-      {/* 瀏覽器支援統計區塊（靜態區塊，圖表可先留空 div） */}
+      {/* 瀏覽器支援統計區塊 */}
       <SupportStatsSection />
       {/* 電子報訂閱區塊 */}
-      <section className="py-16 bg-primary/5">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">訂閱我們的電子報</h2>

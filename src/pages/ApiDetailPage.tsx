@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import MainContent from '../components/md/MainContent';
 import ImportantNote from '../components/md/ImportantNote';
-import ReactMarkdown from 'react-markdown';
+import FaqCard from '../components/FaqCard';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import * as remarkGfm from 'remark-gfm';
@@ -13,7 +13,6 @@ import { visit } from 'unist-util-visit';
 import type { Parent } from 'unist';
 import type { PhrasingContent } from 'mdast';
 import type { Api } from './CollectionsPage';
-import FaqCard from '../components/FaqCard';
 
 // mock 使用範例
 const mockExamples = [
@@ -28,35 +27,6 @@ const mockExamples = [
     title: 'POST 請求',
     code: `fetch('https://api.example.com/data', {\n  method: 'POST',\n  headers: {\n    'Content-Type': 'application/json'\n  },\n  body: JSON.stringify({ name: '張小明', email: 'zhang@example.com' })\n})\n  .then(response => response.json())\n  .then(data => console.log('Success:', data));`,
     description: '發送 POST 請求需要指定 method 和 body：',
-  },
-];
-
-// mock FAQ
-const mockFaqs = [
-  {
-    id: 'faq1',
-    q: 'Fetch API 與 XMLHttpRequest 相比有哪些優勢？',
-    a: `Fetch API 相比 XMLHttpRequest 有以下優勢：\n\n- 基於 Promise，避免了回調地獄，代碼更簡潔\n- 提供了更強大的請求控制能力\n- 支持流式處理\n- 更好的錯誤處理機制\n- 與現代 JavaScript 特性（如 async/await）更好地集成\n- 設計更加模塊化，如 Headers、Request 和 Response 物件`,
-  },
-  {
-    id: 'faq2',
-    q: '為什麼 fetch() 不會在 HTTP 錯誤狀態時拒絕 Promise？',
-    a: `Fetch API 的設計理念是，只有在網路錯誤或請求被阻止時才會拒絕 Promise。HTTP 錯誤狀態（如 404 或 500）被視為正常的 HTTP 響應，因此 Promise 會正常解析。這種設計使開發者能夠更靈活地處理不同的 HTTP 狀態碼，而不是將所有非成功狀態碼都視為錯誤。為了檢查請求是否成功，應該檢查 \`response.ok\` 屬性或 \`response.status\` 屬性。`,
-  },
-  {
-    id: 'faq3',
-    q: '如何在 Fetch 請求中發送 cookies？',
-    a: `默認情況下，Fetch 請求不會發送 cookies。要發送 cookies，需要設置 \`credentials\` 選項：\n\n\`\`\`js\nfetch('https://api.example.com/data', {\n  credentials: 'include' // 包括跨域請求的 cookies\n});\n\`\`\`\n\n\`credentials\` 選項有三個可能的值：\n- \`omit\`：不發送 cookies\n- \`same-origin\`：只在同源請求中發送 cookies（默認值）\n- \`include\`：在所有請求中發送 cookies，包括跨域請求`,
-  },
-  {
-    id: 'faq4',
-    q: '如何處理 Fetch 請求的超時？',
-    a: `Fetch API 本身不提供超時選項，但可以使用 \`Promise.race()\` 和 \`AbortController\` 來實現超時功能：\n\n\`\`\`js\nfunction fetchWithTimeout(url, options = {}, timeout = 5000) {\n  const controller = new AbortController();\n  const { signal } = controller;\n  const timeoutPromise = new Promise((_, reject) => {\n    setTimeout(() => {\n      controller.abort();\n      reject(new Error(\`Request timed out after \${timeout}ms\`));\n    }, timeout);\n  });\n  return Promise.race([\n    fetch(url, { ...options, signal }),\n    timeoutPromise\n  ]);\n}\n\`\`\``,
-  },
-  {
-    id: 'faq5',
-    q: '如何使用 Fetch API 進行錯誤處理？',
-    a: `完整的 Fetch API 錯誤處理應該包括網路錯誤和 HTTP 錯誤：\n\n\`\`\`js\nasync function fetchWithErrorHandling(url, options = {}) {\n  try {\n    const response = await fetch(url, options);\n    if (!response.ok) {\n      const errorData = await response.json().catch(() => ({}));\n      throw {\n        status: response.status,\n        statusText: response.statusText,\n        data: errorData\n      };\n    }\n    return await response.json();\n  } catch (error) {\n    if (error instanceof TypeError && error.message.includes('fetch')) {\n      throw new Error('Network error. Please check your connection.');\n    }\n    if (error.status) {\n      throw new Error(\`Server error: \${error.status} \${error.statusText}\`);\n    }\n    throw error;\n  }\n}\n\`\`\``,
   },
 ];
 

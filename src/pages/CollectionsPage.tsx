@@ -26,7 +26,6 @@ export type Api = {
   isFavorite: boolean;
   important_note: string;
   updated_at: string;
-  // 其他欄位可依 supabase schema 擴充
 };
 
 // 工具函式：根據 supported 顯示版本或『不支援』
@@ -42,7 +41,51 @@ const CollectionsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [apis, setApis] = useState<Api[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [filters, setFilters] = useState({
+    browserSupport: '全部',
+    lastUpdated: '全部'
+  });
   const navigate = useNavigate();
+
+  // 篩選選項
+  const filterOptions = {
+    browserSupport: ['全部', '完全支援', '部分支援'],
+    lastUpdated: ['全部', '最近一週', '最近一個月', '最近三個月']
+  };
+
+  // 處理篩選條件變更
+  const handleFilterChange = (category: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [category]: value
+    }));
+    setPage(1); // 重置頁碼
+  };
+
+  // 重設所有篩選條件
+  const resetFilters = () => {
+    setFilters({
+      browserSupport: '全部',
+      lastUpdated: '全部'
+    });
+    setPage(1);
+  };
+
+  // 點擊外部關閉下拉選單
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.filter-dropdown')) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // 取得 supabase 資料
   useEffect(() => {
@@ -71,10 +114,48 @@ const CollectionsPage: React.FC = () => {
   }, [tab]);
 
   // 篩選
-  const filteredApis = apis.filter(api =>
-    (activeCategory === '全部' || api.tags.includes(activeCategory)) &&
-    (!showFavoriteOnly || api.isFavorite)
-  );
+  const filteredApis = apis.filter(api => {
+    // 分類篩選
+    if (activeCategory !== '全部' && !api.tags.includes(activeCategory)) {
+      return false;
+    }
+    
+    // 收藏篩選
+    if (showFavoriteOnly && !api.isFavorite) {
+      return false;
+    }
+
+    // 瀏覽器支援篩選
+    if (filters.browserSupport !== '全部') {
+      const supportedBrowsers = api.browsers.filter(b => b.supported).length;
+      const totalBrowsers = api.browsers.length;
+      if (filters.browserSupport === '完全支援' && supportedBrowsers !== totalBrowsers) {
+        return false;
+      }
+      if (filters.browserSupport === '部分支援' && supportedBrowsers === totalBrowsers) {
+        return false;
+      }
+    }
+
+    // 最後更新時間篩選
+    if (filters.lastUpdated !== '全部') {
+      const updateDate = new Date(api.updated_at);
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - updateDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (filters.lastUpdated === '最近一週' && diffDays > 7) {
+        return false;
+      }
+      if (filters.lastUpdated === '最近一個月' && diffDays > 30) {
+        return false;
+      }
+      if (filters.lastUpdated === '最近三個月' && diffDays > 90) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   // 分頁（假設每頁 6 筆）
   const pageSize = 6;
@@ -106,13 +187,72 @@ const CollectionsPage: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center space-x-4">
               {/* 篩選條件下拉 */}
-              <div className="relative">
-                <button className="flex items-center space-x-2 text-sm text-gray-700 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50" type="button">
+              <div className="relative filter-dropdown">
+                <button 
+                  className="flex items-center space-x-2 text-sm text-gray-700 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50" 
+                  type="button"
+                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                >
                   <i className="ri-filter-3-line w-5 h-5"></i>
                   <span>篩選條件</span>
                   <i className="ri-arrow-down-s-line w-5 h-5"></i>
                 </button>
-                {/* 篩選下拉內容可用 popover 實作 */}
+                
+                {showFilterDropdown && (
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-4">
+                      {/* 瀏覽器支援篩選 */}
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">瀏覽器支援</h3>
+                        <div className="space-y-2">
+                          {filterOptions.browserSupport.map(option => (
+                            <label key={option} className="flex items-center">
+                              <input
+                                type="radio"
+                                name="browserSupport"
+                                value={option}
+                                checked={filters.browserSupport === option}
+                                onChange={(e) => handleFilterChange('browserSupport', e.target.value)}
+                                className="form-radio text-primary"
+                              />
+                              <span className="ml-2 text-sm text-gray-600">{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* 最後更新時間篩選 */}
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-gray-700 mb-2">最後更新</h3>
+                        <div className="space-y-2">
+                          {filterOptions.lastUpdated.map(option => (
+                            <label key={option} className="flex items-center">
+                              <input
+                                type="radio"
+                                name="lastUpdated"
+                                value={option}
+                                checked={filters.lastUpdated === option}
+                                onChange={(e) => handleFilterChange('lastUpdated', e.target.value)}
+                                className="form-radio text-primary"
+                              />
+                              <span className="ml-2 text-sm text-gray-600">{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* 重設按鈕 */}
+                      <div className="pt-3 border-t border-gray-200">
+                        <button
+                          onClick={resetFilters}
+                          className="w-full px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                          重設篩選條件
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               {/* 排序下拉 */}
               <div className="relative">
@@ -228,4 +368,4 @@ const CollectionsPage: React.FC = () => {
   );
 };
 
-export default CollectionsPage; 
+export default CollectionsPage;

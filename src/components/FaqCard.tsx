@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 function FaqCard({ faq }: { faq: { id: string; question: string; answer: string } }) {
   const [open, setOpen] = useState(false);
@@ -34,7 +36,85 @@ function FaqCard({ faq }: { faq: { id: string; question: string; answer: string 
             </button>
           </div>
           <div className="prose prose-slate max-w-none text-sm">
-            <ReactMarkdown>{faq.answer}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                code(props) {
+                  const { className, children, ...rest } = props as { className?: string; children: React.ReactNode };
+                  if (className === undefined) {
+                    return (
+                      <code
+                        className="code-font bg-gray-100 px-1.5 py-0.5 rounded text-gray-800 text-sm"
+                        style={{
+                          fontFamily: '"Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace',
+                          background: '#f3f4f6',
+                          borderRadius: '0.3em',
+                          padding: '0.2em 0.4em',
+                          fontSize: '.85rem',
+                        }}
+                        {...rest}
+                      >
+                        {children}
+                      </code>
+                    );
+                  }
+                  const match = /language-(\w+)/.exec(className || '');
+                  return (
+                    <pre
+                      style={{
+                        background: '#fafafa',
+                        color: '#383a42',
+                        fontFamily: '"Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace',
+                        borderRadius: '0.3em',
+                        padding: '1em',
+                        margin: '0.5em 0',
+                        overflow: 'auto',
+                      }}
+                    >
+                      <code
+                        className={className}
+                        style={{
+                          background: 'inherit',
+                          color: 'inherit',
+                          fontFamily: 'inherit',
+                          fontSize: '.85rem',
+                          whiteSpace: 'pre',
+                        }}
+                        {...rest}
+                      >
+                        <SyntaxHighlighter
+                          style={oneLight}
+                          language={match ? match[1] : ''}
+                          PreTag="div"
+                          customStyle={{
+                            background: 'inherit',
+                            color: 'inherit',
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            margin: 0,
+                            padding: 0,
+                          }}
+                          codeTagProps={{
+                            style: {
+                              background: 'inherit',
+                              color: 'inherit',
+                              fontFamily: 'inherit',
+                              fontSize: 'inherit',
+                              padding: 0,
+                              margin: 0,
+                            }
+                          }}
+                        >
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      </code>
+                    </pre>
+                  );
+                },
+                strong({ children }) {
+                  return <strong className="font-bold">{children}</strong>;
+                }
+              }}
+            >{faq.answer.replace(/\\n/g, '\n')}</ReactMarkdown>
           </div>
         </div>
       )}

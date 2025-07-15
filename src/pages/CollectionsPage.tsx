@@ -36,7 +36,6 @@ function browserSupportText(version: string, supported: boolean) {
 const CollectionsPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('全部');
   const [showFavoriteOnly, setShowFavoriteOnly] = useState(false);
-  const [sortType] = useState('使用率排序');
   const [tab, setTab] = useState('最新');
   const [page, setPage] = useState(1);
   const [apis, setApis] = useState<Api[]>([]);
@@ -156,14 +155,13 @@ const CollectionsPage: React.FC = () => {
 
     return true;
   });
-
   // 分頁（假設每頁 6 筆）
   const pageSize = 6;
   const totalPages = Math.ceil(filteredApis.length / pageSize) || 1;
   const pagedApis = filteredApis.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Header />
       {/* 分類橫向 tag */}
       <div className="bg-white border-b border-gray-100 sticky top-[57px] z-40">
@@ -253,15 +251,6 @@ const CollectionsPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-              </div>
-              {/* 排序下拉 */}
-              <div className="relative">
-                <button className="flex items-center space-x-2 text-sm text-gray-700 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50" type="button">
-                  <i className="ri-sort-desc w-5 h-5"></i>
-                  <span>{sortType}</span>
-                  <i className="ri-arrow-down-s-line w-5 h-5"></i>
-                </button>
-                {/* 排序下拉內容可用 popover 實作 */}
               </div>
               {/* 收藏顯示 toggle */}
               <div className="flex items-center space-x-2">

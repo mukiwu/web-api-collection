@@ -2,8 +2,68 @@ import React from 'react';
 import SupportStatsSection from '../sections/SupportStatsSection';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useApi } from '../context/ApiContext/hook';
+import { Skeleton } from '../components/ui/Skeleton';
 
 const HomePage: React.FC = () => {
+  const { popularTags, isLoadingTags, error } = useApi();
+
+  const renderTagCards = () => {
+    if (isLoadingTags) {
+      return Array(6).fill(null).map((_, index) => (
+        <div key={index} className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+          <div className="p-6">
+            <Skeleton className="w-14 h-14 rounded-full mb-5" />
+            <Skeleton className="h-7 w-3/4 mb-3" />
+            <Skeleton className="h-20 w-full mb-4" />
+            <div className="flex flex-wrap gap-2 mb-5">
+              <Skeleton className="h-6 w-20" />
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+          </div>
+        </div>
+      ));
+    }
+
+    if (error) {
+      return (
+        <div className="col-span-full text-center py-8">
+          <p className="text-red-500">{error}</p>
+        </div>
+      );
+    }
+
+    return popularTags.map((tag) => (
+      <div key={tag.tag_name} className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+        <div className="p-6">
+          <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
+            <i className={`${tag.icon_name} ri-2x`}></i>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-3">{tag.display_name}</h3>
+          <p className="text-gray-600 mb-4">{tag.description}</p>
+          <div className="flex flex-wrap gap-2 mb-5">
+            {/* 這裡可以添加相關的子標籤，如果需要的話 */}
+            <span className="tag">{tag.tag_name}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">{tag.usage_count} 個 API</span>
+            <a href={`/collections?tag=${tag.tag_name}`} className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
+              <span>查看全部</span>
+              <div className="w-5 h-5 flex items-center justify-center ml-1">
+                <i className="ri-arrow-right-line"></i>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header 區塊 */}
@@ -27,19 +87,19 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a href="/collections" className="px-5 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors flex items-center !rounded-button whitespace-nowrap">
+              <a href="/collections" className="px-5 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors flex items-center whitespace-nowrap">
                 <div className="w-5 h-5 flex items-center justify-center mr-2">
                   <i className="ri-compass-3-line"></i>
                 </div>
                 <span>探索熱門 API</span>
               </a>
-              <a href="#" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center !rounded-button whitespace-nowrap">
+              <a href="#" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center whitespace-nowrap">
                 <div className="w-5 h-5 flex items-center justify-center mr-2">
                   <i className="ri-book-open-line"></i>
                 </div>
                 <span>開始學習</span>
               </a>
-              <a href="/collections" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center !rounded-button whitespace-nowrap">
+              <a href="/collections" className="px-5 py-3 bg-white text-gray-800 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 flex items-center whitespace-nowrap">
                 <div className="w-5 h-5 flex items-center justify-center mr-2">
                   <i className="ri-file-list-3-line"></i>
                 </div>
@@ -56,155 +116,11 @@ const HomePage: React.FC = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">熱門 API 分類</h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">瀏覽各種功能強大的 Web API 分類，助您實現各種網頁應用功能需求</p>
           </div>
-          {/* 分類卡片內容（靜態六張） */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* DOM APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-file-list-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">DOM APIs</h3>
-                <p className="text-gray-600 mb-4">操作文件物件模型的 API，包含選取、修改和監聽 DOM 元素的各種方法。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">Document</span>
-                  <span className="tag">Element</span>
-                  <span className="tag">Event</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">42 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            {/* 裝置 APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-device-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">裝置 APIs</h3>
-                <p className="text-gray-600 mb-4">存取使用者裝置功能的 API，如地理位置、相機、麥克風和其他感測器資料。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">Geolocation</span>
-                  <span className="tag">Camera</span>
-                  <span className="tag">Sensors</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">28 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            {/* 儲存 APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-database-2-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">儲存 APIs</h3>
-                <p className="text-gray-600 mb-4">在瀏覽器中儲存和管理資料的 API，從簡單的 key-value 儲存到複雜的資料庫系統。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">LocalStorage</span>
-                  <span className="tag">IndexedDB</span>
-                  <span className="tag">Cache</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">15 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            {/* 網路 APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-wifi-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">網路 APIs</h3>
-                <p className="text-gray-600 mb-4">處理網路請求和通訊的 API，包含 HTTP 請求、WebSockets 和網路狀態監測。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">Fetch</span>
-                  <span className="tag">WebSocket</span>
-                  <span className="tag">XMLHttpRequest</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">18 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            {/* 通知 APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-notification-4-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">通知 APIs</h3>
-                <p className="text-gray-600 mb-4">向使用者發送通知和提醒的 API，包含瀏覽器通知、推送通知和震動提醒。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">Notifications</span>
-                  <span className="tag">Push</span>
-                  <span className="tag">Vibration</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">9 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
-            {/* 多媒體 APIs */}
-            <div className="api-category-card bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              <div className="p-6">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-primary/10 text-primary mb-5">
-                  <i className="ri-gamepad-line ri-2x"></i>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">多媒體 APIs</h3>
-                <p className="text-gray-600 mb-4">處理音訊、視訊和圖形的 API，包含媒體播放、錄製和處理功能。</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  <span className="tag">Audio</span>
-                  <span className="tag">Video</span>
-                  <span className="tag">Canvas</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">23 個 API</span>
-                  <a href="#" className="text-primary hover:text-primary/80 font-medium text-sm flex items-center !rounded-button whitespace-nowrap">
-                    <span>查看全部</span>
-                    <div className="w-5 h-5 flex items-center justify-center ml-1">
-                      <i className="ri-arrow-right-line"></i>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </div>
+            {renderTagCards()}
           </div>
           <div className="mt-12 text-center">
-            <a href="#" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap">
+            <a href="/collections" className="inline-flex items-center px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap">
               <div className="w-5 h-5 flex items-center justify-center mr-2">
                 <i className="ri-apps-line"></i>
               </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ApiFavoriteButton from '../components/ApiFavoriteButton';
@@ -13,7 +13,8 @@ function browserSupportText(version: string, supported: boolean) {
 }
 
 const CollectionsPage: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<string>('全部');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeCategory, setActiveCategory] = useState<string>(searchParams.get('tag') || '全部');
   const [showFavoriteOnly, setShowFavoriteOnly] = useState(false);
   const [tab, setTab] = useState('最新');
   const [page, setPage] = useState(1);
@@ -25,6 +26,25 @@ const CollectionsPage: React.FC = () => {
     lastUpdated: '全部',
   });
   const navigate = useNavigate();
+
+  // 監聽 URL 參數變化
+  useEffect(() => {
+    const tagParam = searchParams.get('tag');
+    if (tagParam) {
+      setActiveCategory(decodeURIComponent(tagParam));
+    }
+  }, [searchParams]);
+
+  // 處理分類變更
+  const handleCategoryChange = (cat: string) => {
+    setActiveCategory(cat);
+    if (cat === '全部') {
+      searchParams.delete('tag');
+    } else {
+      searchParams.set('tag', cat);
+    }
+    setSearchParams(searchParams);
+  };
 
   // 從 API 資料中提取所有唯一的 tags
   const categories = useMemo(() => {
@@ -147,7 +167,7 @@ const CollectionsPage: React.FC = () => {
               <button
                 key={cat}
                 className={`tag whitespace-nowrap px-4 py-2 cursor-pointer ${activeCategory === cat ? '!bg-primary !text-white' : 'bg-gray-100 text-gray-700'} font-medium rounded-full transition-colors`}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => handleCategoryChange(cat)}
               >
                 {cat}
               </button>

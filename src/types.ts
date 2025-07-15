@@ -20,4 +20,12 @@ export interface Api {
   favorite_count?: number;
   updated_at: string;
   created_at: string;
+}
+
+export interface TagMetadata {
+  tag_name: string;
+  display_name: string;
+  description: string;
+  icon_name: string;
+  usage_count: number;
 } 

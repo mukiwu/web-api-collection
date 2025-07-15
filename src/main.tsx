@@ -1,16 +1,16 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import './index.css'
-import App from './App'
-import { ApiProvider } from './context/ApiContext'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import './index.css';
+import { ApiProvider } from './hooks/useApi';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ApiProvider>
-      <BrowserRouter>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <ApiProvider>
         <App />
-      </BrowserRouter>
-    </ApiProvider>
-  </StrictMode>,
-)
+      </ApiProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);

@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Modal from '../components/ui/Modal';
+
+interface FileChange {
+  filename: string;
+  status: 'added' | 'modified' | 'removed' | 'renamed';
+  html_url: string;
+}
 
 interface Update {
   id: string;
@@ -16,26 +23,18 @@ interface Update {
     items: string[];
     code?: string;
   };
+  baseTag: string | null;
+  headTag: string;
 }
 
 const UpdateItem: React.FC<{
   update: Update;
   openDetails: string | null;
   toggleDetails: (id: string) => void;
-}> = ({ update, openDetails, toggleDetails }) => {
-  const { id, date, type, typeColor, typeIcon, title, version, description, details } = update;
+  onShowChanges: (baseTag: string | null, headTag: string, title: string) => void;
+}> = ({ update, openDetails, toggleDetails, onShowChanges }) => {
+  const { id, date, type, typeColor, typeIcon, title, version, description, details, baseTag, headTag } = update;
   const isOpen = openDetails === id;
-
-  const codeExample = details.code ? (
-    <div className="mt-4">
-      <h4 className="code-font text-sm font-medium text-gray-900 mb-2">程式碼範例：</h4>
-      <div className="bg-gray-900 rounded-lg p-4 overflow-x-auto">
-        <pre className="text-sm text-gray-200">
-          <code>{details.code}</code>
-        </pre>
-      </div>
-    </div>
-  ) : null;
 
   return (
     <div className="p-6">
@@ -66,12 +65,12 @@ const UpdateItem: React.FC<{
                 <i className="ri-arrow-down-s-line"></i>
               </div>
             </button>
-            <a href="#" className="text-sm text-gray-500 hover:text-gray-700 flex items-center !rounded-button">
+            <button onClick={() => { console.log('UpdateItem baseTag:', baseTag); onShowChanges(baseTag, headTag, title); }} className="text-sm text-gray-500 hover:text-gray-700 flex items-center !rounded-button" disabled={!baseTag}>
               <div className="w-5 h-5 flex items-center justify-center mr-1">
                 <i className="ri-file-text-line"></i>
               </div>
               <span className="whitespace-nowrap">變更文件</span>
-            </a>
+            </button>
           </div>
           {isOpen && (
             <section className="mt-4">
@@ -88,7 +87,6 @@ const UpdateItem: React.FC<{
                       </li>
                     ))}
                   </ul>
-                  {codeExample}
                 </div>
               </div>
             </section>
@@ -99,23 +97,39 @@ const UpdateItem: React.FC<{
   );
 };
 
+const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const statusMap: { [key: string]: { text: string; className: string } } = {
+    added: { text: '新增', className: 'bg-green-100 text-green-800' },
+    modified: { text: '修改', className: 'bg-blue-100 text-blue-800' },
+    removed: { text: '移除', className: 'bg-red-100 text-red-800' },
+    renamed: { text: '重命名', className: 'bg-yellow-100 text-yellow-800' },
+  };
+  const { text, className } = statusMap[status] || { text: status, className: 'bg-gray-100 text-gray-800' };
+  return <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${className}`}>{text}</span>;
+};
+
 
 const UpdatesPage: React.FC = () => {
   const [openDetails, setOpenDetails] = useState<string | null>(null);
   const [updates, setUpdates] = useState<Update[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [changedFiles, setChangedFiles] = useState<FileChange[]>([]);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
   useEffect(() => {
     const fetchReleases = async () => {
       try {
         const response = await fetch('https://api.github.com/repos/mukiwu/web-api-collection/releases');
         const releases = await response.json();
-        const formattedReleases = releases.map((release: any): Update => {
+        
+        const formattedReleases = releases.map((release: any, index: number): Update => {
           const { name, tag_name, published_at, body } = release;
           let type = '功能更新';
           let typeColor = 'blue';
           let typeIcon = 'ri-refresh-line';
 
-          if (name.toLowerCase().includes('feat') || name.toLowerCase().includes('feature')) {
+          if (name.toLowerCase().includes('feat')) {
             type = '新功能';
             typeColor = 'green';
             typeIcon = 'ri-add-line';
@@ -128,6 +142,9 @@ const UpdatesPage: React.FC = () => {
             typeColor = 'yellow';
             typeIcon = 'ri-error-warning-line';
           }
+
+          const previousRelease = releases[index + 1];
+          const baseTag = previousRelease ? previousRelease.tag_name : null;
 
           return {
             id: `release-${release.id}`,
@@ -142,7 +159,9 @@ const UpdatesPage: React.FC = () => {
               title: '更新內容：',
               items: body.split('\n').slice(1).filter((line: string) => line.trim().startsWith('* ')).map((line: string) => line.replace('* ', '')),
               code: ''
-            }
+            },
+            baseTag,
+            headTag: tag_name,
           };
         });
         setUpdates(formattedReleases);
@@ -156,6 +175,36 @@ const UpdatesPage: React.FC = () => {
 
   const toggleDetails = (id: string) => {
     setOpenDetails(openDetails === id ? null : id);
+  };
+
+  const handleShowChanges = async (baseTag: string | null, headTag: string, title: string) => {
+    console.log('handleShowChanges called');
+    console.log('baseTag:', baseTag, 'headTag:', headTag);
+
+    if (!baseTag) {
+      console.log('baseTag is null, exiting.');
+      return;
+    }
+    
+    setModalTitle(`「${title}」的變更文件`);
+    setIsModalOpen(true);
+    console.log('isModalOpen set to true');
+    setIsLoadingFiles(true);
+    setChangedFiles([]);
+
+    try {
+      const apiUrl = `https://api.github.com/repos/mukiwu/web-api-collection/compare/${baseTag}...${headTag}`;
+      console.log('Fetching from:', apiUrl);
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      console.log('API response:', data);
+      setChangedFiles(data.files || []);
+    } catch (error) {
+      console.error("Error fetching commit comparison:", error);
+    } finally {
+      setIsLoadingFiles(false);
+      console.log('Finished fetching, isLoadingFiles set to false');
+    }
   };
 
   return (
@@ -327,6 +376,7 @@ const UpdatesPage: React.FC = () => {
                     update={update}
                     openDetails={openDetails}
                     toggleDetails={toggleDetails}
+                    onShowChanges={handleShowChanges}
                   />
                 ))}
               </div>
@@ -335,6 +385,30 @@ const UpdatesPage: React.FC = () => {
         </div>
       </main>
       <Footer />
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={modalTitle}>
+        {isLoadingFiles ? (
+          <div className="flex items-center justify-center h-48">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {changedFiles.length > 0 ? changedFiles.map(file => (
+              <li key={file.filename} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50">
+                <span className="code-font text-sm text-gray-700">{file.filename}</span>
+                <div className="flex items-center space-x-4">
+                  <StatusBadge status={file.status} />
+                  <a href={file.html_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">
+                    查看 Diff
+                  </a>
+                </div>
+              </li>
+            )) : (
+              <p className="text-center text-gray-500 py-8">沒有找到變更的文件。</p>
+            )}
+          </ul>
+        )}
+      </Modal>
     </div>
   );
 };

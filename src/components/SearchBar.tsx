@@ -1,8 +1,8 @@
 import React from 'react';
-import { useApiContext } from '../context/ApiContext';
+import { useApi } from '../context/ApiContext/hook';
 
 export const SearchBar: React.FC = () => {
-  const { search, setSearch } = useApiContext();
+  const { search, setSearch } = useApi();
 
   return (
     <div className="search-container relative">

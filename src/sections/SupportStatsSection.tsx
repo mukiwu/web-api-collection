@@ -152,7 +152,7 @@ const SupportStatsSection: React.FC = () => {
     ],
   };
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-primary/5">
       <div className="container mx-auto">
         <div className="mx-auto">
           <div className="text-center mb-12">

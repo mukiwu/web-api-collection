@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-const UpdateItem: React.FC<{
+interface Update {
+  id: string;
   date: string;
   type: string;
   typeColor: string;
@@ -15,10 +16,14 @@ const UpdateItem: React.FC<{
     items: string[];
     code?: string;
   };
-  id: string;
+}
+
+const UpdateItem: React.FC<{
+  update: Update;
   openDetails: string | null;
   toggleDetails: (id: string) => void;
-}> = ({ date, type, typeColor, typeIcon, title, version, description, details, id, openDetails, toggleDetails }) => {
+}> = ({ update, openDetails, toggleDetails }) => {
+  const { id, date, type, typeColor, typeIcon, title, version, description, details } = update;
   const isOpen = openDetails === id;
 
   const codeExample = details.code ? (
@@ -37,7 +42,7 @@ const UpdateItem: React.FC<{
       <div className="flex">
         <aside className="w-32 flex-shrink-0">
           <time className="text-sm text-gray-500">{date}</time>
-          <div className={`mt-1 inline-flex items-center rounded-full ${typeColor}-50 px-2 py-1`}>
+          <div className={`mt-1 inline-flex items-center rounded-full bg-${typeColor}-50 px-2 py-1`}>
             <div className={`w-4 h-4 flex items-center justify-center mr-1 text-${typeColor}-600`}>
               <i className={typeIcon}></i>
             </div>
@@ -97,71 +102,61 @@ const UpdateItem: React.FC<{
 
 const UpdatesPage: React.FC = () => {
   const [openDetails, setOpenDetails] = useState<string | null>(null);
+  const [updates, setUpdates] = useState<Update[]>([]);
+
+  useEffect(() => {
+    const fetchReleases = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/mukiwu/web-api-collection/releases');
+        const releases = await response.json();
+        const formattedReleases = releases.map((release: any): Update => {
+          const { name, tag_name, published_at, body } = release;
+          let type = '功能更新';
+          let typeColor = 'blue';
+          let typeIcon = 'ri-refresh-line';
+
+          if (name.toLowerCase().includes('feat') || name.toLowerCase().includes('feature')) {
+            type = '新功能';
+            typeColor = 'green';
+            typeIcon = 'ri-add-line';
+          } else if (name.toLowerCase().includes('fix')) {
+            type = '問題修復';
+            typeColor = 'purple';
+            typeIcon = 'ri-tools-line';
+          } else if (name.toLowerCase().includes('deprecated')) {
+            type = '棄用通知';
+            typeColor = 'yellow';
+            typeIcon = 'ri-error-warning-line';
+          }
+
+          return {
+            id: `release-${release.id}`,
+            date: new Date(published_at).toISOString().split('T')[0],
+            type,
+            typeColor,
+            typeIcon,
+            title: name,
+            version: tag_name,
+            description: body.split('\n')[0].replace(/#+\s*/, ''),
+            details: {
+              title: '更新內容：',
+              items: body.split('\n').slice(1).filter((line: string) => line.trim().startsWith('* ')).map((line: string) => line.replace('* ', '')),
+              code: ''
+            }
+          };
+        });
+        setUpdates(formattedReleases);
+      } catch (error) {
+        console.error("Error fetching GitHub releases:", error);
+      }
+    };
+
+    fetchReleases();
+  }, []);
 
   const toggleDetails = (id: string) => {
     setOpenDetails(openDetails === id ? null : id);
   };
-
-  const updates = [
-    {
-      id: 'update-1',
-      date: '2025-07-03',
-      type: '新功能',
-      typeColor: 'green',
-      typeIcon: 'ri-add-line',
-      title: 'Web Animations API',
-      version: 'v2.1.0',
-      description: '新增高級動畫控制功能，支援更複雜的動畫序列和時間軸控制。',
-      details: {
-        title: '更新內容：',
-        items: [
-          '新增 AnimationTimeline 介面，支援自定義時間軸',
-          '支援動畫組合和序列控制',
-          '優化動畫性能和記憶體使用',
-        ],
-        code: `const element = document.querySelector('.animated-element');\nconst timeline = new AnimationTimeline({\n  duration: 3000,\n  iterations: Infinity\n});\nconst keyframes = [\n  { transform: 'scale(1)', opacity: 1 },\n  { transform: 'scale(1.5)', opacity: 0.5 },\n  { transform: 'scale(1)', opacity: 1 }\n];\nelement.animate(keyframes, {\n  duration: 2000,\n  iterations: Infinity,\n  timeline: timeline\n});`
-      }
-    },
-    {
-      id: 'update-2',
-      date: '2025-07-02',
-      type: '功能更新',
-      typeColor: 'blue',
-      typeIcon: 'ri-refresh-line',
-      title: 'File System Access API',
-      version: 'v1.5.0',
-      description: '改進檔案系統存取權限管理，新增目錄遞迴讀取功能。',
-      details: {
-        title: '更新內容：',
-        items: [
-          '新增目錄遞迴讀取功能',
-          '改進權限管理機制',
-          '優化檔案讀寫性能',
-        ],
-        code: `async function readDirectory() {\n  try {\n    const dirHandle = await window.showDirectoryPicker();\n    for await (const entry of dirHandle.values()) {\n      if (entry.kind === 'file') {\n        const file = await entry.getFile();\n        console.log(\`檔案: \${file.name}\`);\n      }\n    }\n  } catch (err) {\n    console.error('讀取目錄失敗:', err);\n  }\n}`
-      }
-    },
-    {
-      id: 'update-3',
-      date: '2025-07-01',
-      type: '棄用通知',
-      typeColor: 'yellow',
-      typeIcon: 'ri-error-warning-line',
-      title: 'Web SQL Database',
-      version: 'v3.0.0',
-      description: 'Web SQL Database API 將在未來版本中棄用，建議使用 IndexedDB 或其他現代儲存方案。',
-      details: {
-        title: '棄用說明：',
-        items: [
-          'Web SQL Database 將在 2026 年底停止支援',
-          '建議使用 IndexedDB 作為替代方案',
-          '提供資料遷移工具和指南',
-        ],
-        code: `// 從 Web SQL 遷移到 IndexedDB\nconst dbName = 'myDatabase';\nconst request = indexedDB.open(dbName, 1);\nrequest.onupgradeneeded = function(event) {\n  const db = event.target.result;\n  const store = db.createObjectStore('users', {\n    keyPath: 'id',\n    autoIncrement: true\n  });\n  store.createIndex('name', 'name');\n  store.createIndex('email', 'email', { unique: true });\n};`
-      }
-    }
-  ];
-
 
   return (
     <div className="min-h-screen bg-white">
@@ -329,7 +324,7 @@ const UpdatesPage: React.FC = () => {
                 {updates.map(update => (
                   <UpdateItem
                     key={update.id}
-                    {...update}
+                    update={update}
                     openDetails={openDetails}
                     toggleDetails={toggleDetails}
                   />

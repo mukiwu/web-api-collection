@@ -1,0 +1,35 @@
+name: Auto Release PR
+
+on:
+  workflow_run:
+    workflows: [ "PR Review & AI Analysis" ]  # 你原本的 workflow 名稱
+    types:
+      - completed
+
+jobs:
+  create-release-pr:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create PR from dev to main
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: dev
+          destination_branch: main
+          pr_title: "🚀 發佈版本：從 dev 合併到 main"
+          pr_body: |
+            自動建立的發佈 PR，請確認以下項目：
+
+            - ✅ 所有測試與靜態分析已通過
+            - ✅ AI 審查已完成
+            - 📦 發佈版本內容請見 commit 記錄與變更摘要
+
+            請 @mukiwu 進行審查與確認。
+          pr_label: "release"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reviewers: mukiwu
+          assignees: mukiwu
